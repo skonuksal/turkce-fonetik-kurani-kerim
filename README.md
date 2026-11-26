@@ -1,186 +1,66 @@
 # Kur'an Satır Arası — Türkçe Fonetik
 
-Kur'an-ı Kerim'i **Arapça metniyle hizalı, Türkçe fonetik okunuşla** sunan açık kaynaklı bir okuma uygulaması. Amaç: Arapça bilmeyenlerin Arapça metni doğru telaffuzla takip edebilmesi, kelime kelime karşılığını görebilmesi, tecvid kurallarını yazıdan okuyabilmesi.
+Kur'an-ı Kerim'i **Arapça metniyle birebir hizalı, uzun ünlülü ve tecvid işaretli Türkçe fonetik okunuşla** sunan ücretsiz, reklamsız ve tamamen çevrimdışı açık kaynaklı okuma uygulaması.
 
-- **Web demo:** `demo/index.html` (tek dosya)
+- **Web demo:** `demo/index.html` (tek dosya, sıfır bağımlılık)
 - **Android APK:** [GitHub Releases](https://github.com/skonuksal/turkce-fonetik-kurani-kerim/releases)
-
-## Neden bu uygulama?
-
-Kur'an okumayı öğrenirken en çok işime yarayan şey evimdeki **satır arası Türkçe okunuşlu** Mushaf olmuştu. Fakat telefona geçtiğimde aynı deneyimi veren bir uygulama bulamadım: neredeyse hiçbiri Türkçe fonetik göstermiyor, gösterenler de ya kelime hizalaması sunmuyor ya da tecvidi yazıya dökmüyordu.
-
-Profesyonel yazılımcı değilim; elimdeki tek alet Claude'du. İhtiyaca odaklanarak parça parça oturttum:
-
-- **Türkçe fonetik** [Açık Kuran](https://acikkuran.com)'dan çekiliyor.
-- **Kelime bazlı bubble mekaniği** [QuranWBW](https://quranwbw.com)'nin kelime hizalı verisinden geliyor.
-- **Tecvid** (peltek, kalın, idğâm) Türkçe alfabenin karşılayamadığı sesler için birleşik Unicode işaretleriyle yazıya dökülüyor.
-- Okunuş iki farklı şekilde gruplanıyor: **Türkçe fonetiğe göre** (ortak okunan parçalar tek bubble) ve **Arapça kelimeye göre** (her kelime ayrı bubble).
-
-Amacım "mükemmel bir Kur'an uygulaması yazmak" değildi; sadece evimdeki Mushaf'ı cebime taşımaktı. Büyük ihtimalle buradan çok ileri götüremem — ama en azından açık bıraktım, kullanmak ya da üzerine bir şeyler eklemek isteyen olursa diye.
-
-## Ekran görüntüleri
-
-| Türkçe | Arapça | Kelime (WBW) |
-|---|---|---|
-| ![Türkçe modu](screenshots/2.jpg) | ![Arapça modu](screenshots/1.jpg) | ![Kelime modu](screenshots/3.jpg) |
+- **Gizlilik Politikası:** [PRIVACY.md](PRIVACY.md)
 
 ## Özellikler
 
-- **114 sure** + cüz (30) + sayfa (604) dropdown gezintisi
-- Üç okuma modu: **Türkçe** (ortak okunuş grupları), **Arapça** (kelime başına), **Kelime** (WBW — her Arapça kelimenin hecelenmiş Türkçe okunuşu ve anlamı)
-- İki tecvid seviyesi: **Temel** (sade okunuş) / **Tecvid** (peltek, kalın, idğâm işaretleri)
-- İki Arapça kaynak: **Mushaf** (Uthmânî) / **Diyanet** (Açık Kuran)
-- Ayet bazlı Diyanet meali
-- Sayfa sınırlarında inline "Sayfa N · Cüz J" ayırıcı; kaydırma sırasında üst bardaki dropdownlar canlı güncellenir
-- Temalar: Papirüs, Deniz, Gece
-- Arapça ve fonetik yazı boyutu ayarları
-- Son okunan ayeti hatırlar (bubble'a dokunulan ayet)
-- Ayarlar ve kaldığın yer cihazda yerel kaydedilir (localStorage)
+- **6.236 ayetin tamamında (77.429 Arapça kelime) %100 hizalı birleşik Türkçe fonetik:**
+  - Uzun ünlüler (`â, î, û`), kalın/ince ünlü ayrımı (`ı/i`, `ü/u`), gerçek okunuş (idğâm/iklâb/şemsî bağlama), nûn-u kutnî ve mîm-i cem' kuralları
+- **Üç okuma modu:**
+  - **Türkçe:** Her Arapça kelimeye dokununca heceli okunuşu ve bağlantılı grubun birleşik okunuşu açılır
+  - **Arapça:** Her kelime bağımsız dokunma balonuyla gösterilir
+  - **Kelime:** Birbirine bağlanarak okunan kelimeler tek kartta gruplanır; heceli okunuş + kelime anlamı satır altında görünür
+- **İki okunuş seviyesi + uygulama içi Tecvid İşaretleri Rehberi:** **Temel** / **Tecvid** (`z̲, s̲, ż̲, ḋ, ṫ, h̄, ḣ, g, ğ`)
+- **İki Arapça hat:** **Mushaf** (Uthmânî) / **Diyanet** (Açık Kuran)
+- **Dört tema:** Papirüs, Deniz, Gece, Bordo
+- **Kolay gezinme:** 114 sure (Türkçe arama destekli), 30 cüz, 604 sayfa seçicileri, sure başı Besmele, sure sonu Önceki/Sonraki geçişi, Meal & Kelime Anlamı aç/kapat
+- **Tamamen çevrimdışı & yerel:** Ayarlar ve son okunan yer cihazda saklanır (`localStorage`)
 
-## Tecvid işaretleri
+## Tecvid İşaretleri
 
-Türkçe alfabede Arapça harflerin tamamının karşılığı yoktur; birbirine yakın sesler aynı Türkçe harfe düşer. Tecvid modunda bu ayrımı **birleşik işaretlerle (Unicode combining marks)** gösteririz. Temel okunuşta harf sade (z, s, d, t, h, k) görünür.
-
-### Peltek harfler — alt çizgi (U+0332)
-
-Dil ucu dişlerin arasına değerek çıkarılan ince sesler.
-
-| Arapça | İsim | Türkçe | Örnek |
+| İşaret | Arapça | Okunuş | Örnek |
 |---|---|---|---|
-| ذ | zel  | **z̲** (z + alt çizgi) | elle*z̲*ine (2:3) |
-| ث | se   | **s̲** (s + alt çizgi) | s̲emer |
-
-### Kalın harfler — üst nokta (U+0307)
-
-Tınısı genizden/peltek olmayan, kalın ve emfatik çıkarılan sesler.
-
-| Arapça | İsim | Türkçe | Örnek |
-|---|---|---|---|
-| ض | dâd  | **ḋ** (d + üst nokta) | e*ḋ*âe (2:20) |
-| ط | tı   | **ṫ** (t + üst nokta) | yaḣ-*ṫ*afu (2:20) |
-| خ | hı   | **ḣ** (h + üst nokta) | *ḣ*afilîn |
-
-### Kalın ح — üst çizgi (U+0304)
-
-ح (hâ) sesi Türkçede yine "h" ile karşılanır ama telaffuzu boğazdan ve daha güçlüdür. Dot-above'lu ḣ (خ) ile karıştırmamak için üst çizgi kullanılır.
-
-| Arapça | Türkçe | Örnek |
-|---|---|---|
-| ح | **h̄** (h + üst çizgi) | rah̄mân, rah̄îm (1:1) |
-
-### Kalın + peltek — ظ
-
-ظ (zı) hem peltek hem kalın çıkar; ikisi de bindirilir.
-
-| Arapça | Türkçe | Örnek |
-|---|---|---|
-| ظ | **ż̲** (z + alt çizgi + üst nokta) | aż̲leme (2:20) |
-
-### Kâf-ı kalın — ق
-
-ق (kâf) sesi Türkçede **g** ile karşılanır (kalın "q" yerine gırtlaktan "g").
-
-| Arapça | Türkçe |
-|---|---|
-| ق | **g** (k değil) |
-| ك | **k** (kef, sade) |
-
-Örnek: *ga*-mû (2:20), *g*adîr, *g*ıyâme.
-
-### İdğâm (birleşme) işareti — kısa çizgi
-
-İki Arapça kelime birbiriyle tecvid gereği kesintisiz okunuyorsa, okunuş metninde tire ile bağlanır ve **ortak bir bubble** oluştururlar:
-
-- `min-kablikum` — nûn sâkine + qâf = **ihfâ**
-- `lehum-meşev` — mîm + mîm = **idğâm misleyn**
-- `rabihat-ticâretuhum` — tâ + tâ = **idğâm misleyn**
-- `en-naas`, `er-rahmân` — şemsi idğâm (lâm-ı ta'rif)
-
-Tanvîn/nûn sâkinenin `m/v/y/l/r` önünde değişmesi (idğâm) otomatik uygulanır: "men" → "mem", "en" → "el" vs.
-
-## Veri kaynakları
-
-| Dosya | Kaynak | Açıklama |
-|---|---|---|
-| `data/arabic-uthmani.json` | Tanzil Uthmânî | Arapça Mushaf metni |
-| `data/arabic-acikkuran.json` | acikkuran.com | Arapça (Diyanet stili) |
-| `data/quranwbw-syllables.json` | quranwbw.com | Kelime bazlı İngilizce heceleme + tecvid ipuçları |
-| `data/acikkuran-turkish-phonetic.json` | acikkuran.com | Türkçe okunuş (satır bazında) |
-| `data/diyanet-meal.json` | Diyanet | Türkçe meal |
-| `data/wbw-turkish-meanings.json` | türetilmiş | Kelime kelime Türkçe anlamlar |
-| `output/turkish-syllables.json` | üretilen | Temel seviye kelime bazlı hece çıktısı |
-| `output/turkish-syllables-tajweed.json` | üretilen | Tecvid işaretli çıktı |
+| **â î û** | Med | Uzun ünlü | rah-mâ-nir-ra-hîm |
+| **z̲** | ذ | Peltek z | el-le-z̲î-ne |
+| **s̲** | ث | Peltek s | ke-s̲î-ra-tey |
+| **ż̲** | ظ | Kalın + peltek z | a-ż̲îm |
+| **ḋ** | ض | Kalın d (dâd) | ve-leḋ-ḋâl-lîn |
+| **ṫ** | ط | Kalın t (tı) | sı-râ-ṫal |
+| **ḣ** | خ | Hırıltılı h (hı) | ḣal-fe-hüm |
+| **h̄** | ح | Boğazdan kalın h (hâ) | rah̄-mân |
+| **g** | ق | Kalın k (kâf) | gul, ga-rî-bâ |
+| **ğ** | غ | Yumuşak g (ğayın) | ğay-ril-mağ-ḋû-bi |
+| **-** | Bağ | Hece / idğâm geçişi | hü-del-lil-müt-te-gîn |
 
 ## Mimari
 
-- **`src/convert.js`** — WBW heceleri ile Açık Kuran Türkçe okunuşunu kelime bazında hizalar.
-- **`src/align.js`, `src/normalize.js`** — karakter normalizasyonu ve eşleme yardımcıları.
-- **`generate.js`** — çıktıya tecvid işaretlerini (peltek, kalın, kaf→g, idğâm) uygular; temel ve tecvid JSON'larını üretir.
-- **`demo/index.html`** — tek dosyalık web uygulaması (HTML + CSS + JS; framework yok).
-- **`apk-build/`** — Capacitor ile Android APK paketleme (web uygulamasının aynısı WebView içinde).
+- **`src/phonetic.js`** — Tanzil Uthmânî Arapça metni ile Muhammet Abay çeviriyazısını 6.236 ayette birebir hizalar; bağlama ünsüz kaydırma, idğâm tespiti, kalın `ı` kuralı, Türkçe heceleme ve Temel/Tecvid dönüşümlerini üretir.
+- **`generate.js`** — `output/turkish-syllables.json`, `output/turkish-syllables-tajweed.json` ve `apk-build/www/output/` kopyalarını üretir.
+- **`demo/index.html`** & **`apk-build/www/index.html`** — Tek dosyalık çevrimdışı okuyucu.
+- **`test/transliteration.test.js`** — 6.236 ayet / 77.429 kelime bütünlük, sıfır akademik sembol sızıntısı ve paket eşitliği testleri.
+- **`checks/reader-tap.cjs`** — APK içinden çıkarılan okuyucuda mobil dokunma, arama, tema, Besmele, Kelime modu ve tam korpus Playwright testi.
 
-## Kullanım
-
-### Veriyi yeniden üretmek
+## Geliştirme
 
 ```bash
-npm install
 npm run generate
-# output/turkish-syllables.json ve turkish-syllables-tajweed.json yenilenir
+npm test
 ```
 
-### Ayet düzeyinde Türkçe çeviriyazı
-
-Üç modda da her Arapça kelimeye dokununca o kelimenin Türkçe okunuşu balonda açılır. Türkçe modunda bağlantılı okunan grubun okunuşu da aynı balonda görünür. Başka bir kelimeye dokununca seçim değişir. Aynı kelimeye tekrar dokunarak, dışarı dokunarak veya Escape ile balonu kapatabilirsiniz.
-
-Açık Kuran kelime hizalamasının eksik olduğu 17 ayette balon, Muhammet Abay edisyonundaki karşılığı gösterir. Bu ayetlerin Arapça konumları edisyondaki boşluk ve bağlantı tireleriyle eşleştirilmiştir. Hûd 11:61 ve Kasas 28:79'daki hitaplar iki yazılı parçayı tek Arapça kelimede birleştirir. **Ayetin tamamı · Muhammet Abay çeviriyazısı** satırından her ayetin kaynak okunuşunu çevrimdışı açabilirsiniz.
-
-Edisyon, [Tanzil kaynak listesinde](https://tanzil.net/trans/) Muhammet Abay, *Çeviriyazı* olarak yer alır. Paketlenen JSON'un [sabitlenmiş kaynak kopyası](https://github.com/fawazahmed0/quran-api/blob/c28652eef566619a1b47e41aacc734d0799f455a/editions/tur-muhammetabay.json) otomatik testte dosya parmak iziyle denetlenir. Bu veri projenin MIT kod lisansının dışındadır. Tanzil'in kullanım koşulları ticari kullanım için çevirmen veya yayıncı izni gerektirir.
-
-### Okunuşu denetleme
-
-`npm run generate` temel ve tecvid verilerini hem web hem Android kaynaklarına yazar. `npm test`, temel okunuştaki harfleri ve kesme işaretlerini Açık Kuran metniyle karşılaştırır. Karşılaştırma, boşlukları, hece tirelerini ve cümle noktalamasını atlar. Eşleşmeyen ayetlerin numaraları üretim sırasında listelenir. Bu ayetler için okuyucu, mevcutsa ayrıca eşleştirilmiş Abay okunuşunu gösterir.
-
-Bu denetim Türkçe kaynağın korunmasını ölçer. Mahreç, med, vakıf ve vasıl ile tek tek kelime ve hece sınırlarının doğruluğu ayrıca denetlenmelidir.
-
-### Web demo
+Web önizleme:
 
 ```bash
-python -m http.server 8000
-# http://localhost:8000/demo/
+python -m http.server 4173 --directory apk-build/www
+# http://127.0.0.1:4173/
 ```
 
-`demo/index.html` doğrudan dosya sisteminden de açılabilir ama `fetch` cross-origin politikası yüzünden veri yüklemesi HTTP sunucusu ister.
+## Veri Kaynakları ve Lisans
 
-### APK derleme
-
-```bash
-cd apk-build
-npx cap sync android
-cd android
-./gradlew assembleDebug
-# çıktı: apk-build/android/app/build/outputs/apk/debug/app-debug.apk
-```
-
-APK'yı telefona yüklemek için Android'de "Bilinmeyen kaynaklardan yükle" izni gerekir.
-
-### Obtainium ile otomatik güncelleme
-
-[Obtainium](https://obtainium.imranr.dev), GitHub Releases'tan doğrudan APK kurup otomatik güncelleme takibi yapan bir uygulamadır.
-
-1. Obtainium'u kur (F-Droid veya kendi GitHub Releases'ı).
-2. **Add App** → URL alanına `https://github.com/skonuksal/turkce-fonetik-kurani-kerim` yapıştır.
-3. **Add** → **Install**. Sonraki sürümler Obtainium'dan tek tıkla güncellenir.
-
-## Lisans
-
-Kod: **MIT** ([LICENSE](LICENSE))
-
-Veri lisansları kaynak sağlayıcılarına aittir (Tanzil, QuranWBW, Açık Kuran, Diyanet). Mushaf metninin kendisi kamu malıdır.
-
-## Teşekkür
-
-- [quranwbw.com](https://quranwbw.com) — kelime bazlı heceleme, sayfa/cüz indeksi
-- [acikkuran.com](https://acikkuran.com) — Türkçe okunuş, Diyanet meali
-- [Tanzil](https://tanzil.net) — Uthmânî Mushaf metni
-- [Mahfuz](https://mahfuz.ilg.az/about) — UI esini
+- **Kod:** MIT ([LICENSE](LICENSE))
+- **Arapça Mushaf:** [Tanzil](https://tanzil.net) (Uthmânî) ve [Açık Kuran](https://acikkuran.com) (Diyanet hattı)
+- **Türkçe Fonetik Tabanı:** [Tanzil](https://tanzil.net/trans/) — Muhammet Abay *Çeviriyazı* edisyonu (ücretsiz ve ticari olmayan kullanım için)
+- **Meal:** Diyanet İşleri Başkanlığı

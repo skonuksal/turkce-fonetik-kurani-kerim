@@ -1,7 +1,7 @@
 {
-  "name": "kuran-turkce-satir-arasi",
-  "version": "1.0.0",
-  "description": "Kur'an-i Kerim Turkce satir arasi (word-by-word) heceli transliterasyon. QuranWBW hece yapisi + Acik Kuran Turkce fonetik verisi birlestirilmistir.",
+  "name": "turkce-fonetik-kurani-kerim",
+  "version": "1.2.0",
+  "description": "Kur'an-ı Kerim Türkçe satır arası fonetik ve tecvidli okunuş uygulaması. Tüm 6.236 ayet Arapça kelimelerle birebir hizalıdır.",
   "main": "src/index.js",
   "scripts": {
     "generate": "node generate.js",
@@ -14,12 +14,14 @@
     "turkish",
     "word-by-word",
     "satir-arasi",
-    "phonetic"
+    "phonetic",
+    "tajweed",
+    "tecvid"
   ],
   "author": "skonuksal",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/skonuksal/kuran-turkce-satir-arasi"
+    "url": "https://github.com/skonuksal/turkce-fonetik-kurani-kerim"
   }
 }

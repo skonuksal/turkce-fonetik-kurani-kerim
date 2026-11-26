@@ -1,11 +1,13 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const path = require("node:path");
 const { createHash } = require("node:crypto");
 const { test } = require("node:test");
 const { convertVerseUnified } = require("../src/phonetic");
 const arabic = require("../data/arabic-uthmani.json");
 const arabicAcik = require("../data/arabic-acikkuran.json");
 const abayJson = require("../data/muhammet-abay.json");
+const wbwMeanings = require("../data/wbw-turkish-meanings.json");
 const basic = require("../output/turkish-syllables.json");
 const tajweed = require("../output/turkish-syllables-tajweed.json");
 
@@ -26,15 +28,11 @@ test("unified phonetic & tajweed outputs match expected Turkish kıraat samples"
     "ğay-ril-", "mağ-d\u0307û-bi", "a-ley-him", "ve-led\u0307-", "d\u0307âl-lîn",
   ]);
 
-  // Huruf-u Mukattaa stays intact on single Arabic word
   assert.deepEqual(basic["2:1"], ["elif-lâm-mîm"]);
-
-  // Idgam across space in both Temel & Tecvid
   assert.deepEqual(basic["2:2"], [
     "zâ-li-kel-", "ki-tâ-bü", "lâ", "ray-be", "fîh", "hü-del-", "lil-müt-te-kîn",
   ]);
 
-  // Fetih 48:18 (previously broken / fell back to academic transcription)
   assert.deepEqual(basic["48:18"], [
     "le-kad", "ra-dı-yel-", "lâ-hü", "a-nil-", "mü'-mi-nî-ne", "iz",
     "yü-bâ-yi-'û-ne-ke", "tah-teş-", "şe-ce-ra-ti", "fe-'a-li-me", "mâ",
@@ -45,19 +43,15 @@ test("unified phonetic & tajweed outputs match expected Turkish kıraat samples"
   assert.equal(tajweed["48:18"][5], "iz\u0332");
   assert.equal(tajweed["48:18"][12], "gu-lû-bi-him");
 
-  // Nisa 4:119 (previously truncated in Acik Kuran)
   assert.equal(basic["4:119"].length, 21);
   assert.equal(basic["4:119"][20], "mü-bî-nâ");
 
-  // Munafikun 63:10 (2-Arabic-word compound split: مِن مَّا -> mim- | mâ)
   assert.equal(basic["63:10"][1], "mim-");
   assert.equal(basic["63:10"][2], "mâ");
 
-  // Nûn-u kutnî (7:8) & Mîm-i cem' (29:25)
   assert.equal(basic["7:8"][1], "yev-me-i-zi-nil-");
   assert.equal(basic["29:25"][21], "ve-me'-vâ-kü-mün-");
 
-  // Direct conversion matches generated output
   const direct = convertVerseUnified("48:18", arabic["48:18"], abay["48:18"]);
   assert.deepEqual(direct.basic, basic["48:18"]);
   assert.deepEqual(direct.tajweed, tajweed["48:18"]);
@@ -74,10 +68,12 @@ test("all 6,236 verses and 77,429 words align 100% with zero academic symbol lea
   let totalWords = 0;
 
   for (const key of keys) {
+    const [s, v] = key.split(":");
     const arLen = arabic[key].split(" ").length;
     assert.equal(arLen, arabicAcik[key].split(" ").length, key);
     assert.equal(basic[key].length, arLen, `basic length mismatch at ${key}`);
     assert.equal(tajweed[key].length, arLen, `tajweed length mismatch at ${key}`);
+    assert.equal(wbwMeanings[s]?.[v]?.[0]?.length, arLen, `wbw meanings length mismatch at ${key}`);
 
     for (let i = 0; i < arLen; i++) {
       const bw = basic[key][i];
@@ -96,18 +92,31 @@ test("all 6,236 verses and 77,429 words align 100% with zero academic symbol lea
   assert.deepEqual(arabic["37:130"].split(" ").map((g) => g.split("\u00a0").length), [1, 1, 2]);
 });
 
-test("web demo and Android APK bundles are byte-for-byte identical", () => {
+test("web demo and Android APK bundles are identical and free of unused data", () => {
   for (const [a, b] of [
     ["../demo/index.html", "../apk-build/www/index.html"],
     ["../output/turkish-syllables.json", "../apk-build/www/output/turkish-syllables.json"],
     ["../output/turkish-syllables-tajweed.json", "../apk-build/www/output/turkish-syllables-tajweed.json"],
     ["../data/arabic-uthmani.json", "../apk-build/www/data/arabic-uthmani.json"],
+    ["../data/arabic-acikkuran.json", "../apk-build/www/data/arabic-acikkuran.json"],
+    ["../data/diyanet-meal.json", "../apk-build/www/data/diyanet-meal.json"],
+    ["../data/wbw-turkish-meanings.json", "../apk-build/www/data/wbw-turkish-meanings.json"],
   ]) {
     assert.ok(
       fs.readFileSync(require.resolve(a)).equals(fs.readFileSync(require.resolve(b))),
       `${a} differs from ${b}`
     );
   }
+
+  // Ensure dead runtime assets are not shipped in APK
+  const wwwDataDir = path.join(__dirname, "../apk-build/www/data");
+  const wwwFiles = fs.readdirSync(wwwDataDir).sort();
+  assert.deepEqual(wwwFiles, [
+    "arabic-acikkuran.json",
+    "arabic-uthmani.json",
+    "diyanet-meal.json",
+    "wbw-turkish-meanings.json",
+  ]);
 });
 
 test("pinned Muhammet Abay source blob is intact", () => {

@@ -10,8 +10,25 @@ async function main() {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('http://127.0.0.1:4173/');
+
+    // P0 check: Turkish search handles İ/ı/â folding ("ihlas" finds 112. İhlâs)
+    await page.locator('#surahSearch').fill('ihlas');
+    assert.equal(await page.locator('.surah-item[data-surah="112"]').count(), 1);
+    await page.locator('#surahSearch').fill('');
+
+    // P0 check: switching Arapça source (Mushaf/Diyanet) must NOT reset selected theme
+    await page.locator('#homeScreen [data-action="openSettings"]').tap();
+    await page.locator('.theme-option[data-t="bordo"]').tap();
+    await page.locator('.source-option[data-source="acikkuran"]').tap();
+    assert.equal(await page.evaluate(() => document.documentElement.getAttribute('data-theme')), 'bordo');
+    await page.locator('.source-option[data-source="uthmani"]').tap();
+    await page.locator('#openGuideBtn').tap();
+    await page.locator('#guideOverlay.open').waitFor({state: 'visible'});
+    await page.locator('#closeGuideBtn').tap();
+    await page.keyboard.press('Escape');
+
     await page.locator('.surah-item[data-surah="1"]').tap();
-    assert.equal(await page.locator('.verse-reference').count(), 0);
+    assert.equal(await page.locator('.surah-besmele').count(), 0);
     const verse = page.locator('.verse[data-verse="1"]');
     const tooltip = page.getByRole('tooltip');
     for (const mode of ['turkish', 'arabic']) {
@@ -36,10 +53,11 @@ async function main() {
       await tooltip.waitFor({state: 'hidden'});
     }
 
-    // WBW mode groups connected readings into a single tappable card
+    // WBW mode groups connected readings into a single tappable card with Turkish meaning
     await page.locator('[data-mode="wbw"]').tap();
     const wbwButtons = verse.locator('button[data-translit]');
     assert.equal(await wbwButtons.count(), 1);
+    assert.ok((await wbwButtons.first().locator('.wbw-meaning').textContent()).includes('Allah'));
     await wbwButtons.first().tap();
     await tooltip.waitFor({state: 'visible'});
     assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'bis-mil-lâ-hir-rah-mâ-nir-ra-hîm');
@@ -47,8 +65,9 @@ async function main() {
     await tooltip.waitFor({state: 'hidden'});
     await page.locator('[data-mode="turkish"]').tap();
 
-    await page.locator('#backBtn').tap();
-    await page.locator('.surah-item[data-surah="48"]').tap();
+    // Surah 48: Besmele header + Fetih 48:18 unified reading
+    await page.locator('#surahSelectReader').selectOption('48');
+    assert.equal(await page.locator('.surah-besmele').count(), 1);
     const fetih18 = page.locator('.verse[data-verse="18"] button[data-translit]');
     assert.equal(await fetih18.count(), 19);
     await fetih18.nth(1).tap();
@@ -56,8 +75,12 @@ async function main() {
     assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'ra-dı-yel-');
     assert.match(await tooltip.textContent(), /Birlikte: radıyel-lâhü/);
 
-    await page.locator('#backBtn').tap();
-    await page.locator('.surah-item[data-surah="4"]').tap();
+    // Surah 9 (Tevbe): no Besmele header
+    await page.locator('#surahSelectReader').selectOption('9');
+    assert.equal(await page.locator('.surah-besmele').count(), 0);
+
+    // Surah 4:119 complete 21 words
+    await page.locator('#surahSelectReader').selectOption('4');
     const nisa = page.locator('.verse[data-verse="119"] button[data-translit]');
     assert.equal(await nisa.count(), 21);
     await nisa.last().tap();
@@ -80,7 +103,7 @@ async function main() {
     });
     assert.deepEqual(checks, []);
     assert.deepEqual(errors, []);
-    console.log('Touch, keyboard, viewport, Fetih 48:18, Nisa 4:119 and full corpus checks passed.');
+    console.log('Search, theme, guide, Besmele, touch, WBW grouping, Fetih 48:18, Nisa 4:119 and full corpus checks passed.');
   } finally {
     await browser.close();
   }
