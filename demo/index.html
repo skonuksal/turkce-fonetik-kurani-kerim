@@ -14,6 +14,8 @@
       --color-text-translation: #5c5040;
       --color-border: #d9d0bc;
       --color-accent: #8b6914;
+      --color-highlight: #8b6914;
+      --color-on-accent: var(--color-bg);
       --color-word-hover: rgba(139, 105, 20, 0.12);
       --color-word-hover-text: #6b4c00;
       --font-arabic: "Shaikh Hamdullah Mushaf", "Scheherazade New", "Traditional Arabic", serif;
@@ -30,6 +32,8 @@
       --color-text-translation: #3d5c52;
       --color-border: #c4d8d0;
       --color-accent: #0d7377;
+      --color-highlight: #0d7377;
+      --color-on-accent: var(--color-bg);
       --color-word-hover: rgba(13, 115, 119, 0.12);
       --color-word-hover-text: #065a5e;
     }
@@ -42,8 +46,24 @@
       --color-text-translation: #c4bdb0;
       --color-border: #2a2820;
       --color-accent: #7aad4a;
+      --color-highlight: #7aad4a;
+      --color-on-accent: var(--color-bg);
       --color-word-hover: rgba(122, 173, 74, 0.15);
       --color-word-hover-text: #a4d470;
+    }
+
+    [data-theme="bordo"] {
+      --color-bg: #242423;
+      --color-surface: #2d2c2a;
+      --color-text-primary: #bdb5b2;
+      --color-text-secondary: #948c89;
+      --color-text-translation: #a8a09d;
+      --color-border: #3a3836;
+      --color-accent: #8a3d3d;
+      --color-highlight: #b85555;
+      --color-on-accent: #bdb5b2;
+      --color-word-hover: rgba(184, 85, 85, 0.22);
+      --color-word-hover-text: #b85555;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -95,7 +115,7 @@
     .home-header h1 {
       font-size: 22px;
       font-weight: 700;
-      color: var(--color-accent);
+      color: var(--color-highlight);
       margin-bottom: 4px;
     }
     .home-header p {
@@ -174,7 +194,7 @@
       justify-content: center;
       font-size: 13px;
       font-weight: 600;
-      color: var(--color-accent);
+      color: var(--color-highlight);
       flex-shrink: 0;
     }
     .surah-info { flex: 1; min-width: 0; }
@@ -197,7 +217,7 @@
     .surah-item .resume-badge {
       font-size: 10px;
       background: var(--color-accent);
-      color: var(--color-bg);
+      color: var(--color-on-accent);
       padding: 2px 6px;
       border-radius: 4px;
       flex-shrink: 0;
@@ -280,7 +300,7 @@
       gap: 10px;
       padding: 6px 0;
       margin: 6px 0 2px;
-      color: var(--color-accent);
+      color: var(--color-highlight);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.08em;
@@ -312,7 +332,7 @@
     .reader-title h2 {
       font-size: 15px;
       font-weight: 600;
-      color: var(--color-accent);
+      color: var(--color-highlight);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -342,7 +362,7 @@
     .mode-btn:hover { color: var(--color-text-primary); }
     .mode-btn.active {
       background: var(--color-accent);
-      color: var(--color-bg);
+      color: var(--color-on-accent);
       font-weight: 600;
     }
 
@@ -392,8 +412,12 @@
     }
     .word.active, .wbw-word.active {
       background: var(--color-accent);
-      color: var(--color-bg);
+      color: var(--color-on-accent);
       border-radius: 4px;
+    }
+    .wbw-word.active .wbw-arabic,
+    .wbw-word.active .wbw-translit {
+      color: var(--color-on-accent);
     }
 
     .ayah-badge {
@@ -467,21 +491,6 @@
       margin-right: 4px;
     }
 
-    .verse-reference {
-      margin: 0.4rem 0;
-      text-align: left;
-      line-height: 1.65;
-    }
-    .verse-reference summary {
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-    .verse-reference[open] div {
-      margin-top: 0.25rem;
-      color: var(--color-text-primary);
-    }
-
     /* Loading */
     .loading {
       text-align: center;
@@ -541,7 +550,7 @@
     }
     .theme-option {
       flex: 1;
-      padding: 12px;
+      padding: 10px 6px;
       border: 2px solid var(--color-border);
       border-radius: 10px;
       cursor: pointer;
@@ -551,7 +560,7 @@
       font-family: var(--font-ui);
     }
     .theme-option:hover { border-color: var(--color-text-secondary); }
-    .theme-option.active { border-color: var(--color-accent); }
+    .theme-option.active { border-color: var(--color-highlight); }
     .theme-dot {
       width: 28px; height: 28px;
       border-radius: 50%;
@@ -611,6 +620,7 @@
       flex-direction: column;
       align-items: center;
       min-width: 60px;
+      max-width: 100%;
       padding: 4px 6px;
       border-radius: 6px;
       cursor: pointer;
@@ -625,6 +635,7 @@
       color: var(--color-text-primary);
       line-height: 1.9;
       direction: rtl;
+      text-align: center;
     }
     .wbw-translit {
       direction: ltr;
@@ -633,7 +644,8 @@
       font-style: italic;
       color: var(--color-text-secondary);
       margin-top: 4px;
-      white-space: nowrap;
+      text-align: center;
+      overflow-wrap: anywhere;
     }
     .wbw-meaning {
       direction: ltr;
@@ -651,7 +663,7 @@
       width: 30px; height: 30px;
       border-radius: 50%;
       background: var(--color-surface);
-      color: var(--color-accent);
+      color: var(--color-highlight);
       font-family: var(--font-ui);
       font-size: 0.75rem;
       font-weight: 600;
@@ -757,6 +769,10 @@
           <div class="theme-dot" style="background:#0f0e0c;border-color:rgba(255,255,255,0.2)"></div>
           <div class="theme-option-label">Gece</div>
         </button>
+        <button class="theme-option" data-t="bordo">
+          <div class="theme-dot" style="background:linear-gradient(135deg,#242423 50%,#b85555 50%);border-color:#8a3d3d"></div>
+          <div class="theme-option-label">Bordo</div>
+        </button>
       </div>
     </div>
 
@@ -841,7 +857,6 @@ let arabicUthmaniData = null;
 let arabicAcikkuranData = null;
 let arabicData = null;
 let mealData = null;
-let referenceReadings = null;
 let wbwMeaningsData = null;
 let currentSurah = 1;
 let currentMode = 'turkish';
@@ -900,13 +915,12 @@ function applyTheme(theme) {
 
 // === Data Loading ===
 async function loadData() {
-  const [translitRes, tajweedRes, arabicRes, arabicAkRes, mealRes, referenceRes, wbwMeaningsRes] = await Promise.all([
+  const [translitRes, tajweedRes, arabicRes, arabicAkRes, mealRes, wbwMeaningsRes] = await Promise.all([
     fetch('../output/turkish-syllables.json'),
     fetch('../output/turkish-syllables-tajweed.json'),
     fetch('../data/arabic-uthmani.json?v=2'),
     fetch('../data/arabic-acikkuran.json'),
     fetch('../data/diyanet-meal.json'),
-    fetch('../data/muhammet-abay.json'),
     fetch('../data/wbw-turkish-meanings.json'),
   ]);
   translitData = await translitRes.json();
@@ -915,9 +929,6 @@ async function loadData() {
   arabicAcikkuranData = await arabicAkRes.json();
   arabicData = currentSource === 'acikkuran' ? arabicAcikkuranData : arabicUthmaniData;
   mealData = await mealRes.json();
-  const reference = await referenceRes.json();
-  referenceReadings = Object.fromEntries(reference.quran.map(({chapter, verse, text}) =>
-    [`${chapter}:${verse}`, text]));
   wbwMeaningsData = await wbwMeaningsRes.json();
 }
 
@@ -933,25 +944,6 @@ function applySource(source) {
 }
 
 // === Word Grouping ===
-// Reviewed against the Arabic word positions for this pinned Abay edition.
-// Most boundaries are spaces or liaison hyphens. The vocatives in 11:61
-// and 28:79 each occupy one Arabic position but two printed units.
-const referenceJoins = new Map([
-  ["2:273", null], ["3:58", null], ["3:126", null], ["4:83", null],
-  ["4:119", null], ["11:2", null], ["11:61", 5], ["12:107", null],
-  ["16:110", null], ["17:28", null], ["28:79", 10], ["36:27", null],
-  ["40:62", null], ["41:44", null], ["42:15", null], ["42:31", null],
-  ["48:18", null],
-]);
-
-function referenceWordsFor(key, reading, count) {
-  if (!reading || !referenceJoins.has(key)) return [];
-  const words = reading.split(/[ -]/u);
-  const join = referenceJoins.get(key);
-  if (join !== null) words.splice(join, 2, words.slice(join, join + 2).join(" "));
-  return words.length === count && words.every(Boolean) ? words : [];
-}
-
 function groupByTurkish(arabicWords, translitWords) {
   if (!translitWords) return arabicWords.map((w, i) => ({ arabic: [w], translit: '', indices: [i] }));
   const groups = [];
@@ -992,7 +984,7 @@ function cleanTranslit(text) {
 }
 
 // Turkish syllabification: V|V if no consonant between vowels, else only last consonant joins next syllable
-const TR_VOWELS = 'aeıioöuüâAEIİOÖUÜÂ';
+const TR_VOWELS = 'aeıioöuüâîûAEIİOÖUÜÂÎÛ';
 function syllabifyWord(word) {
   if (word.length < 2) return word;
   // Group base char + trailing combining marks (tajweed diacritics) as a single cluster
@@ -1112,40 +1104,35 @@ function renderSurah(surahNum) {
 
     html += `<div class="verse" data-verse="${v}">`;
 
-    const reading = referenceReadings[key];
-    const usesReference = translit.length === 0;
-    const words = usesReference ? referenceWordsFor(key, reading, arabicWords.length) : translit;
-    const canSelectWords = words.length > 0 && words.length === arabicWords.length;
+    const canSelectWords = translit.length > 0 && translit.length === arabicWords.length;
 
     if (!canSelectWords) {
       html += `<div class="verse-arabic">${arabic} <span class="ayah-badge">${v}</span></div>`;
       html += '<div class="verse-translation">Bu ayette kelime okunuşu kullanılamıyor.</div>';
     } else {
       const wbw = currentMode === 'wbw';
-      const groups = currentMode === 'turkish' && !usesReference
-        ? groupByTurkish(arabicWords, words)
-        : groupByArabic(arabicWords, words);
+      const groups = currentMode === 'arabic'
+        ? groupByArabic(arabicWords, translit)
+        : groupByTurkish(arabicWords, translit);
       html += wbw ? '<div class="verse-wbw">' : '<div class="verse-arabic">';
       for (const group of groups) {
-        const context = group.indices.length > 1 ? cleanTranslit(group.translit) : '';
-        for (const i of group.indices) {
-          const wordReading = usesReference ? words[i] : cleanTranslit(words[i]);
-          const info = usesReference ? 'Muhammet Abay · Çeviriyazı' : context ? 'Birlikte: ' + context : '';
-          const attrs = `type="button" data-translit="${escapeHtml(wordReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
-          if (wbw) {
-            html += `<button class="wbw-word" ${attrs}><span class="wbw-arabic" lang="ar">${arabicWords[i]}</span><span class="wbw-translit" lang="tr">${escapeHtml(wordReading)}</span></button>`;
-          } else {
+        if (wbw) {
+          const arText = group.arabic.join(' ');
+          const sylReading = group.indices.map(i => cleanTranslit(translit[i])).join('').replace(/-+/g, '-');
+          const info = group.indices.length > 1 ? 'Birlikte: ' + cleanTranslit(group.translit) : '';
+          const attrs = `type="button" data-translit="${escapeHtml(sylReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
+          html += `<button class="wbw-word" ${attrs}><span class="wbw-arabic" lang="ar">${arText}</span><span class="wbw-translit" lang="tr">${escapeHtml(sylReading)}</span></button>`;
+        } else {
+          const context = group.indices.length > 1 ? cleanTranslit(group.translit) : '';
+          for (const i of group.indices) {
+            const wordReading = cleanTranslit(translit[i]);
+            const info = context ? 'Birlikte: ' + context : '';
+            const attrs = `type="button" data-translit="${escapeHtml(wordReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
             html += `<button class="word" lang="ar" ${attrs}>${arabicWords[i]}</button> `;
           }
         }
       }
       html += `<span class="${wbw ? 'ayah-badge-wbw' : 'ayah-badge'}">${v}</span></div>`;
-    }
-    if (reading) {
-      html += `<details class="verse-reference" lang="tr" dir="ltr"${canSelectWords ? '' : ' open'}>
-        <summary>Ayetin tamamı · Muhammet Abay çeviriyazısı</summary>
-        <div>${escapeHtml(reading)}</div>
-      </details>`;
     }
     const meal = mealData?.[key];
     if (meal) {

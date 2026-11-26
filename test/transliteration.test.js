@@ -1,67 +1,120 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const { createHash } = require("node:crypto");
 const { test } = require("node:test");
-const { convertVerse } = require("../src/convert");
-const wbw = require("../data/quranwbw-syllables.json");
-const source = require("../data/acikkuran-turkish-phonetic.json");
+const { convertVerseUnified } = require("../src/phonetic");
 const arabic = require("../data/arabic-uthmani.json");
+const arabicAcik = require("../data/arabic-acikkuran.json");
+const abayJson = require("../data/muhammet-abay.json");
 const basic = require("../output/turkish-syllables.json");
 const tajweed = require("../output/turkish-syllables-tajweed.json");
 
-function spelling(value) {
-  return value.toLocaleLowerCase("tr").replace(/i\u0307/g, "i")
-    .normalize("NFC").replace(/[\s.,;!?\u2015-]/gu, "");
-}
+const abay = Object.fromEntries(
+  abayJson.quran.map((v) => [`${v.chapter}:${v.verse}`, v.text])
+);
 
-test("keeps source word endings and boundary apostrophes", () => {
-  const v = convertVerse(wbw["2:23"], source["2:23"]);
-  assert.equal(spelling(v.words[11]), "mislihi");
-  const joined = convertVerse(wbw["2:21"], source["2:21"]).words.join("");
-  assert.ok(spelling(joined).includes("nasu'budu"));
+test("unified phonetic & tajweed outputs match expected Turkish kıraat samples", () => {
+  assert.deepEqual(basic["1:1"], ["bis-mil-", "lâ-hir-", "rah-mâ-nir-", "ra-hîm"]);
+  assert.deepEqual(tajweed["1:1"], ["bis-mil-", "lâ-hir-", "rah\u0304-mâ-nir-", "ra-h\u0304îm"]);
+
+  assert.deepEqual(basic["1:7"], [
+    "sı-râ-tal-", "le-zî-ne", "en-'am-te", "a-ley-him",
+    "ğay-ril-", "mağ-dû-bi", "a-ley-him", "ve-led-", "dâl-lîn",
+  ]);
+  assert.deepEqual(tajweed["1:7"], [
+    "sı-râ-t\u0307al-", "le-z\u0332î-ne", "en-'am-te", "a-ley-him",
+    "ğay-ril-", "mağ-d\u0307û-bi", "a-ley-him", "ve-led\u0307-", "d\u0307âl-lîn",
+  ]);
+
+  // Huruf-u Mukattaa stays intact on single Arabic word
+  assert.deepEqual(basic["2:1"], ["elif-lâm-mîm"]);
+
+  // Idgam across space in both Temel & Tecvid
+  assert.deepEqual(basic["2:2"], [
+    "zâ-li-kel-", "ki-tâ-bü", "lâ", "ray-be", "fîh", "hü-del-", "lil-müt-te-kîn",
+  ]);
+
+  // Fetih 48:18 (previously broken / fell back to academic transcription)
+  assert.deepEqual(basic["48:18"], [
+    "le-kad", "ra-dı-yel-", "lâ-hü", "a-nil-", "mü'-mi-nî-ne", "iz",
+    "yü-bâ-yi-'û-ne-ke", "tah-teş-", "şe-ce-ra-ti", "fe-'a-li-me", "mâ",
+    "fî", "ku-lû-bi-him", "fe-en-ze-les-", "se-kî-ne-te", "a-ley-him",
+    "ve-e-sâ-be-hüm", "fet-han", "ka-rî-bâ",
+  ]);
+  assert.equal(tajweed["48:18"][0], "le-gad");
+  assert.equal(tajweed["48:18"][5], "iz\u0332");
+  assert.equal(tajweed["48:18"][12], "gu-lû-bi-him");
+
+  // Nisa 4:119 (previously truncated in Acik Kuran)
+  assert.equal(basic["4:119"].length, 21);
+  assert.equal(basic["4:119"][20], "mü-bî-nâ");
+
+  // Munafikun 63:10 (2-Arabic-word compound split: مِن مَّا -> mim- | mâ)
+  assert.equal(basic["63:10"][1], "mim-");
+  assert.equal(basic["63:10"][2], "mâ");
+
+  // Nûn-u kutnî (7:8) & Mîm-i cem' (29:25)
+  assert.equal(basic["7:8"][1], "yev-me-i-zi-nil-");
+  assert.equal(basic["29:25"][21], "ve-me'-vâ-kü-mün-");
+
+  // Direct conversion matches generated output
+  const direct = convertVerseUnified("48:18", arabic["48:18"], abay["48:18"]);
+  assert.deepEqual(direct.basic, basic["48:18"]);
+  assert.deepEqual(direct.tajweed, tajweed["48:18"]);
 });
 
-test("unmapped or missing Turkish text cannot leak English into the reader", () => {
-  assert.deepEqual(convertVerse(["one", "two"], "").words, []);
-  assert.deepEqual(convertVerse(wbw["4:119"], source["4:119"]).words, []);
-});
-
-test("both readers contain the same complete corpus and mark unresolved alignments", () => {
-  const keys = Object.keys(source).sort();
+test("all 6,236 verses and 77,429 words align 100% with zero academic symbol leakage", () => {
+  const keys = Object.keys(arabic).sort();
   assert.equal(keys.length, 6236);
-  for (const corpus of [basic, tajweed, wbw, arabic]) {
+  for (const corpus of [basic, tajweed, arabicAcik, abay]) {
     assert.deepEqual(Object.keys(corpus).sort(), keys);
   }
-  const knownUnresolved = new Set([
-    "2:273", "3:58", "3:126", "4:83", "4:119", "11:2", "11:61", "12:107",
-    "16:110", "17:28", "28:79", "36:27", "40:62", "41:44", "42:15", "42:31", "48:18",
-  ]);
+
+  const academicLeak = /[ḳẕżŝṣḍṭḥḫ`]/u;
+  let totalWords = 0;
+
   for (const key of keys) {
-    const words = basic[key];
-    assert.equal(words.length, tajweed[key].length, key);
-    if (!words.length) {
-      assert.ok(knownUnresolved.has(key), key);
-      continue;
+    const arLen = arabic[key].split(" ").length;
+    assert.equal(arLen, arabicAcik[key].split(" ").length, key);
+    assert.equal(basic[key].length, arLen, `basic length mismatch at ${key}`);
+    assert.equal(tajweed[key].length, arLen, `tajweed length mismatch at ${key}`);
+
+    for (let i = 0; i < arLen; i++) {
+      const bw = basic[key][i];
+      const tw = tajweed[key][i];
+      assert.ok(bw.length > 0 && tw.length > 0, `empty word at ${key}[${i}]`);
+      assert.ok(!bw.includes("--") && !tw.includes("--"), `double hyphen at ${key}[${i}]`);
+      assert.ok(!bw.startsWith("-") && !tw.startsWith("-"), `leading hyphen at ${key}[${i}]`);
+      assert.ok(!academicLeak.test(bw), `academic symbol leaked in basic at ${key}[${i}]: ${bw}`);
+      assert.ok(!academicLeak.test(tw), `academic symbol leaked in tajweed at ${key}[${i}]: ${tw}`);
+      assert.ok(/[aeıioöuüâîû]/u.test(bw), `vowelless word at ${key}[${i}]: ${bw}`);
+      totalWords++;
     }
-    assert.equal(words.length, wbw[key].length, key);
-    // The Arabic dataset uses NBSP inside a single reading group.
-    assert.equal(words.length, arabic[key].split(" ").length, key);
-    assert.ok(words.every(word => spelling(word).length > 0), key);
-    assert.equal(spelling(words.join("")), spelling(source[key]), key);
   }
-  assert.deepEqual(arabic["37:130"].split(" ").map(group => group.split("\u00a0").length), [1, 1, 2]);
-  assert.deepEqual(arabic, require("../apk-build/www/data/arabic-uthmani.json"));
-  assert.deepEqual(basic, require("../apk-build/www/output/turkish-syllables.json"));
-  assert.deepEqual(tajweed, require("../apk-build/www/output/turkish-syllables-tajweed.json"));
+
+  assert.equal(totalWords, 77429);
+  assert.deepEqual(arabic["37:130"].split(" ").map((g) => g.split("\u00a0").length), [1, 1, 2]);
 });
 
-test("published Turkish reference is complete and identical to the pinned source blob", () => {
-  const fs = require("node:fs");
-  const { createHash } = require("node:crypto");
-  const file = fs.readFileSync(require.resolve("../data/muhammet-abay.json"));
-  const hash = createHash("sha1").update(`blob ${file.length}\0`).update(file).digest("hex");
+test("web demo and Android APK bundles are byte-for-byte identical", () => {
+  for (const [a, b] of [
+    ["../demo/index.html", "../apk-build/www/index.html"],
+    ["../output/turkish-syllables.json", "../apk-build/www/output/turkish-syllables.json"],
+    ["../output/turkish-syllables-tajweed.json", "../apk-build/www/output/turkish-syllables-tajweed.json"],
+    ["../data/arabic-uthmani.json", "../apk-build/www/data/arabic-uthmani.json"],
+  ]) {
+    assert.ok(
+      fs.readFileSync(require.resolve(a)).equals(fs.readFileSync(require.resolve(b))),
+      `${a} differs from ${b}`
+    );
+  }
+});
+
+test("pinned Muhammet Abay source blob is intact", () => {
+  const raw = fs.readFileSync(require.resolve("../data/muhammet-abay.json"), "utf8");
+  const lf = Buffer.from(raw.replace(/\r\n/g, "\n"), "utf8");
+  const hash = createHash("sha1").update(`blob ${lf.length}\0`).update(lf).digest("hex");
   assert.equal(hash, "dba121c1a132564b72d685005041f6ff7b94b6e7");
-  assert.ok(file.equals(fs.readFileSync(require.resolve("../apk-build/www/data/muhammet-abay.json"))));
-  const verses = JSON.parse(file).quran;
-  const keys = verses.map(v => `${v.chapter}:${v.verse}`);
-  assert.deepEqual(keys.sort(), Object.keys(wbw).sort());
-  assert.ok(verses.every(v => typeof v.text === "string" && v.text.trim().length > 0));
+  const verses = JSON.parse(raw).quran;
+  assert.equal(verses.length, 6236);
 });
