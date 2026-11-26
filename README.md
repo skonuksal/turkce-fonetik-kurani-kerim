@@ -131,13 +131,15 @@ npm run generate
 
 ### Ayet düzeyinde Türkçe çeviriyazı
 
-Her ayette **Türkçe çeviriyazı · Muhammet Abay** satırı açılabilir. Metin cihazda saklanır. Türkçe modunda ve kelime hizalaması çözülemeyen ayetlerde bu satır açık gelir. Edisyonun harfleri, uzun ünlüleri, özel işaretleri ve kelime araları aynen gösterilir.
+Üç modda da her Arapça kelimeye dokununca o kelimenin Türkçe okunuşu balonda açılır. Türkçe modunda bağlantılı okunan grubun okunuşu da aynı balonda görünür. Başka bir kelimeye dokununca seçim değişir. Aynı kelimeye tekrar dokunarak, dışarı dokunarak veya Escape ile balonu kapatabilirsiniz.
+
+Açık Kuran kelime hizalamasının eksik olduğu 17 ayette balon, Muhammet Abay edisyonundaki karşılığı gösterir. Bu ayetlerin Arapça konumları edisyondaki boşluk ve bağlantı tireleriyle eşleştirilmiştir. Hûd 11:61 ve Kasas 28:79'daki hitaplar iki yazılı parçayı tek Arapça kelimede birleştirir. **Ayetin tamamı · Muhammet Abay çeviriyazısı** satırından her ayetin kaynak okunuşunu çevrimdışı açabilirsiniz.
 
 Edisyon, [Tanzil kaynak listesinde](https://tanzil.net/trans/) Muhammet Abay, *Çeviriyazı* olarak yer alır. Paketlenen JSON'un [sabitlenmiş kaynak kopyası](https://github.com/fawazahmed0/quran-api/blob/c28652eef566619a1b47e41aacc734d0799f455a/editions/tur-muhammetabay.json) otomatik testte dosya parmak iziyle denetlenir. Bu veri projenin MIT kod lisansının dışındadır. Tanzil'in kullanım koşulları ticari kullanım için çevirmen veya yayıncı izni gerektirir.
 
 ### Okunuşu denetleme
 
-`npm run generate` temel ve tecvid verilerini hem web hem Android kaynaklarına yazar. `npm test`, temel okunuştaki harfleri ve kesme işaretlerini Açık Kuran metniyle karşılaştırır. Karşılaştırma, boşlukları, hece tirelerini ve cümle noktalamasını atlar. Eşleşmeyen ayetlerin numaraları üretim sırasında listelenir. Okuyucu bu ayetlerin Arapçasını ve mealini gösterir, okunuş alanında hizalama durumunu bildirir.
+`npm run generate` temel ve tecvid verilerini hem web hem Android kaynaklarına yazar. `npm test`, temel okunuştaki harfleri ve kesme işaretlerini Açık Kuran metniyle karşılaştırır. Karşılaştırma, boşlukları, hece tirelerini ve cümle noktalamasını atlar. Eşleşmeyen ayetlerin numaraları üretim sırasında listelenir. Bu ayetler için okuyucu, mevcutsa ayrıca eşleştirilmiş Abay okunuşunu gösterir.
 
 Bu denetim Türkçe kaynağın korunmasını ölçer. Mahreç, med, vakıf ve vasıl ile tek tek kelime ve hece sınırlarının doğruluğu ayrıca denetlenmelidir.
 

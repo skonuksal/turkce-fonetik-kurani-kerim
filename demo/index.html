@@ -367,8 +367,19 @@
       line-height: 2.8;
     }
 
+    .word, button.wbw-word {
+      appearance: none;
+      background: transparent;
+      border: 0;
+      color: inherit;
+      font: inherit;
+      touch-action: manipulation;
+    }
+    .word:focus-visible, .wbw-word:focus-visible {
+      outline: 2px solid var(--color-accent);
+    }
     .word {
-      display: inline;
+      display: inline-block;
       position: relative;
       border-radius: 4px;
       padding: 0.12em 0.1em;
@@ -379,7 +390,7 @@
       background: var(--color-word-hover);
       color: var(--color-word-hover-text);
     }
-    .word.active {
+    .word.active, .wbw-word.active {
       background: var(--color-accent);
       color: var(--color-bg);
       border-radius: 4px;
@@ -410,7 +421,9 @@
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      white-space: nowrap;
+      max-width: calc(100vw - 16px);
+      box-sizing: border-box;
+      overflow-wrap: anywhere;
       direction: ltr;
       pointer-events: none;
     }
@@ -424,6 +437,11 @@
     }
     .tooltip.pos-bottom .tooltip-arrow { top: -5px; border-left: 1px solid; border-top: 1px solid; }
     .tooltip.pos-top .tooltip-arrow { bottom: -5px; border-right: 1px solid; border-bottom: 1px solid; }
+    .tooltip-context {
+      margin-top: 3px;
+      font: 0.8rem/1.4 var(--font-ui);
+      color: var(--color-text-secondary);
+    }
     .tooltip-text {
       font-size: var(--translit-size);
       font-family: var(--font-ui);
@@ -915,6 +933,25 @@ function applySource(source) {
 }
 
 // === Word Grouping ===
+// Reviewed against the Arabic word positions for this pinned Abay edition.
+// Most boundaries are spaces or liaison hyphens. The vocatives in 11:61
+// and 28:79 each occupy one Arabic position but two printed units.
+const referenceJoins = new Map([
+  ["2:273", null], ["3:58", null], ["3:126", null], ["4:83", null],
+  ["4:119", null], ["11:2", null], ["11:61", 5], ["12:107", null],
+  ["16:110", null], ["17:28", null], ["28:79", 10], ["36:27", null],
+  ["40:62", null], ["41:44", null], ["42:15", null], ["42:31", null],
+  ["48:18", null],
+]);
+
+function referenceWordsFor(key, reading, count) {
+  if (!reading || !referenceJoins.has(key)) return [];
+  const words = reading.split(/[ -]/u);
+  const join = referenceJoins.get(key);
+  if (join !== null) words.splice(join, 2, words.slice(join, join + 2).join(" "));
+  return words.length === count && words.every(Boolean) ? words : [];
+}
+
 function groupByTurkish(arabicWords, translitWords) {
   if (!translitWords) return arabicWords.map((w, i) => ({ arabic: [w], translit: '', indices: [i] }));
   const groups = [];
@@ -1053,6 +1090,7 @@ function openSurah(num, verse) {
 
 // === Reader ===
 function renderSurah(surahNum) {
+  closeTooltip();
   const content = document.getElementById('content');
   const meta = surahMeta[surahNum];
   let html = '';
@@ -1074,44 +1112,39 @@ function renderSurah(surahNum) {
 
     html += `<div class="verse" data-verse="${v}">`;
 
-    const hasAlignment = translit.length > 0 && translit.length === arabicWords.length;
-    if (!hasAlignment) {
-      html += `<div class="verse-arabic">${arabic} <span class="ayah-badge">${v}</span></div>`;
-      html += '<div class="verse-translation" lang="tr">Bu ayetin Türkçe kelime hizalaması doğrulanamadı.</div>';
-    } else if (currentMode === 'wbw') {
-      const groups = groupByTurkish(arabicWords, translit);
-      html += '<div class="verse-wbw">';
-      for (const group of groups) {
-        const arText = group.arabic.join(' ');
-        // Syllabify each word separately (split on idgam/word-boundary dashes first)
-        const clean = cleanTranslit(group.translit).split('-').map(w => w ? syllabifyWord(w) : '').join('-');
-        html += `<div class="wbw-word" data-verse-ref="${v}">`;
-        html += `<div class="wbw-arabic">${arText}</div>`;
-        html += `<div class="wbw-translit">${clean}</div>`;
-        html += `</div>`;
-      }
-      html += `<span class="ayah-badge-wbw">${v}</span>`;
-      html += '</div>';
-    } else {
-      const groups = groupWords(arabicWords, translit);
-      html += '<div class="verse-arabic">';
-      for (const group of groups) {
-        const arText = group.arabic.join(' ');
-        const trText = group.translit;
-        const clean = cleanTranslit(trText);
-        html += `<span class="word" data-translit="${clean.replace(/"/g, '&quot;')}">${arText}</span> `;
-      }
-      html += `<span class="ayah-badge">${v}</span>`;
-      html += '</div>';
-    }
-
     const reading = referenceReadings[key];
+    const usesReference = translit.length === 0;
+    const words = usesReference ? referenceWordsFor(key, reading, arabicWords.length) : translit;
+    const canSelectWords = words.length > 0 && words.length === arabicWords.length;
+
+    if (!canSelectWords) {
+      html += `<div class="verse-arabic">${arabic} <span class="ayah-badge">${v}</span></div>`;
+      html += '<div class="verse-translation">Bu ayette kelime okunuşu kullanılamıyor.</div>';
+    } else {
+      const wbw = currentMode === 'wbw';
+      const groups = currentMode === 'turkish' && !usesReference
+        ? groupByTurkish(arabicWords, words)
+        : groupByArabic(arabicWords, words);
+      html += wbw ? '<div class="verse-wbw">' : '<div class="verse-arabic">';
+      for (const group of groups) {
+        const context = group.indices.length > 1 ? cleanTranslit(group.translit) : '';
+        for (const i of group.indices) {
+          const wordReading = usesReference ? words[i] : cleanTranslit(words[i]);
+          const info = usesReference ? 'Muhammet Abay · Çeviriyazı' : context ? 'Birlikte: ' + context : '';
+          const attrs = `type="button" data-translit="${escapeHtml(wordReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
+          if (wbw) {
+            html += `<button class="wbw-word" ${attrs}><span class="wbw-arabic" lang="ar">${arabicWords[i]}</span><span class="wbw-translit" lang="tr">${escapeHtml(wordReading)}</span></button>`;
+          } else {
+            html += `<button class="word" lang="ar" ${attrs}>${arabicWords[i]}</button> `;
+          }
+        }
+      }
+      html += `<span class="${wbw ? 'ayah-badge-wbw' : 'ayah-badge'}">${v}</span></div>`;
+    }
     if (reading) {
-      const showReading = currentMode === 'turkish' || !hasAlignment;
-      const escaped = reading.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      html += `<details class="verse-reference" lang="tr" dir="ltr"${showReading ? ' open' : ''}>
-        <summary>Türkçe çeviriyazı · Muhammet Abay</summary>
-        <div>${escaped}</div>
+      html += `<details class="verse-reference" lang="tr" dir="ltr"${canSelectWords ? '' : ' open'}>
+        <summary>Ayetin tamamı · Muhammet Abay çeviriyazısı</summary>
+        <div>${escapeHtml(reading)}</div>
       </details>`;
     }
     const meal = mealData?.[key];
@@ -1122,29 +1155,22 @@ function renderSurah(surahNum) {
   }
 
   content.innerHTML = html;
-  content.querySelectorAll('.word').forEach(el => {
-    el.addEventListener('click', handleWordClick);
-  });
-  content.querySelectorAll('.wbw-word').forEach(el => {
-    el.addEventListener('click', handleWbwWordClick);
-  });
 }
 
-function handleWbwWordClick(e) {
-  const verseEl = e.currentTarget.closest('.verse');
-  if (!verseEl) return;
-  const v = parseInt(verseEl.dataset.verse);
-  if (v) savePrefs({ lastSurah: currentSurah, lastVerse: v });
+function escapeHtml(value) {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // === Tooltip ===
 let activeTooltip = null;
 
-function handleWordClick(e) {
-  const word = e.currentTarget;
+function handleWordClick(word) {
+  const wasOpen = activeTooltip?.word === word;
   const translit = word.dataset.translit;
   if (!translit) return;
   closeTooltip();
+  if (wasOpen) return;
 
   // Track last-read verse by which bubble was tapped
   const verseEl = word.closest('.verse');
@@ -1155,6 +1181,9 @@ function handleWordClick(e) {
 
   const tooltip = document.createElement('div');
   tooltip.className = 'tooltip';
+  tooltip.id = 'word-reading';
+  tooltip.setAttribute('role', 'tooltip');
+  tooltip.lang = 'tr';
   const arrow = document.createElement('div');
   arrow.className = 'tooltip-arrow';
   tooltip.appendChild(arrow);
@@ -1163,19 +1192,26 @@ function handleWordClick(e) {
   text.textContent = translit;
   tooltip.appendChild(text);
 
+  if (word.dataset.context) {
+    const context = document.createElement('div');
+    context.className = 'tooltip-context';
+    context.textContent = word.dataset.context;
+    tooltip.appendChild(context);
+  }
   document.body.appendChild(tooltip);
+  word.setAttribute('aria-describedby', tooltip.id);
+  word.setAttribute('aria-expanded', 'true');
   word.classList.add('active');
 
   const rect = word.getBoundingClientRect();
   const spaceBelow = window.innerHeight - rect.bottom;
-  const posAbove = spaceBelow < 80 && rect.top > 80;
-  tooltip.classList.add(posAbove ? 'pos-top' : 'pos-bottom', 'show');
-
+  tooltip.classList.add('show');
   const tipRect = tooltip.getBoundingClientRect();
+  const posAbove = spaceBelow < tipRect.height + 16 && rect.top > spaceBelow;
+  tooltip.classList.add(posAbove ? 'pos-top' : 'pos-bottom');
   const margin = 8;
-  tooltip.style.top = posAbove
-    ? (rect.top - tipRect.height - margin) + 'px'
-    : (rect.bottom + margin) + 'px';
+  const top = posAbove ? rect.top - tipRect.height - margin : rect.bottom + margin;
+  tooltip.style.top = Math.max(margin, Math.min(top, window.innerHeight - tipRect.height - margin)) + 'px';
 
   let left = rect.left + rect.width / 2 - tipRect.width / 2;
   left = Math.max(margin, Math.min(left, window.innerWidth - tipRect.width - margin));
@@ -1191,12 +1227,16 @@ function closeTooltip() {
   if (activeTooltip) {
     activeTooltip.tooltip.remove();
     activeTooltip.word.classList.remove('active');
+    activeTooltip.word.removeAttribute('aria-describedby');
+    activeTooltip.word.setAttribute('aria-expanded', 'false');
     activeTooltip = null;
   }
 }
 
 document.addEventListener('click', (e) => {
-  if (activeTooltip && !e.target.closest('.word')) closeTooltip();
+  const word = e.target.closest('#content button[data-translit]');
+  if (word) handleWordClick(word);
+  else closeTooltip();
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeTooltip();
