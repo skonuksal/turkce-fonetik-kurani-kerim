@@ -131,7 +131,7 @@ npm run generate
 
 ### Ayet düzeyinde Türkçe çeviriyazı
 
-Her ayette **Türkçe çeviriyazı · Muhammet Abay** satırı açılabilir. Metin cihazda saklanır. Kelime hizalaması çözülemeyen ayetlerde bu satır açık gelir. Edisyonun harfleri, uzun ünlüleri, özel işaretleri ve kelime araları aynen gösterilir.
+Her ayette **Türkçe çeviriyazı · Muhammet Abay** satırı açılabilir. Metin cihazda saklanır. Türkçe modunda ve kelime hizalaması çözülemeyen ayetlerde bu satır açık gelir. Edisyonun harfleri, uzun ünlüleri, özel işaretleri ve kelime araları aynen gösterilir.
 
 Edisyon, [Tanzil kaynak listesinde](https://tanzil.net/trans/) Muhammet Abay, *Çeviriyazı* olarak yer alır. Paketlenen JSON'un [sabitlenmiş kaynak kopyası](https://github.com/fawazahmed0/quran-api/blob/c28652eef566619a1b47e41aacc734d0799f455a/editions/tur-muhammetabay.json) otomatik testte dosya parmak iziyle denetlenir. Bu veri projenin MIT kod lisansının dışındadır. Tanzil'in kullanım koşulları ticari kullanım için çevirmen veya yayıncı izni gerektirir.
 

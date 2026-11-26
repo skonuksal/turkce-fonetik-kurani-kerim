@@ -461,7 +461,7 @@
     }
     .verse-reference[open] div {
       margin-top: 0.25rem;
-      color: var(--color-text);
+      color: var(--color-text-primary);
     }
 
     /* Loading */
@@ -1107,8 +1107,9 @@ function renderSurah(surahNum) {
 
     const reading = referenceReadings[key];
     if (reading) {
+      const showReading = currentMode === 'turkish' || !hasAlignment;
       const escaped = reading.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      html += `<details class="verse-reference" lang="tr" dir="ltr"${hasAlignment ? '' : ' open'}>
+      html += `<details class="verse-reference" lang="tr" dir="ltr"${showReading ? ' open' : ''}>
         <summary>Türkçe çeviriyazı · Muhammet Abay</summary>
         <div>${escaped}</div>
       </details>`;
