@@ -52,3 +52,16 @@ test("both readers contain the same complete corpus and mark unresolved alignmen
   assert.deepEqual(basic, require("../apk-build/www/output/turkish-syllables.json"));
   assert.deepEqual(tajweed, require("../apk-build/www/output/turkish-syllables-tajweed.json"));
 });
+
+test("published Turkish reference is complete and identical to the pinned source blob", () => {
+  const fs = require("node:fs");
+  const { createHash } = require("node:crypto");
+  const file = fs.readFileSync(require.resolve("../data/muhammet-abay.json"));
+  const hash = createHash("sha1").update(`blob ${file.length}\0`).update(file).digest("hex");
+  assert.equal(hash, "dba121c1a132564b72d685005041f6ff7b94b6e7");
+  assert.ok(file.equals(fs.readFileSync(require.resolve("../apk-build/www/data/muhammet-abay.json"))));
+  const verses = JSON.parse(file).quran;
+  const keys = verses.map(v => `${v.chapter}:${v.verse}`);
+  assert.deepEqual(keys.sort(), Object.keys(wbw).sort());
+  assert.ok(verses.every(v => typeof v.text === "string" && v.text.trim().length > 0));
+});

@@ -449,6 +449,21 @@
       margin-right: 4px;
     }
 
+    .verse-reference {
+      margin: 0.4rem 0;
+      text-align: left;
+      line-height: 1.65;
+    }
+    .verse-reference summary {
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .verse-reference[open] div {
+      margin-top: 0.25rem;
+      color: var(--color-text);
+    }
+
     /* Loading */
     .loading {
       text-align: center;
@@ -808,7 +823,7 @@ let arabicUthmaniData = null;
 let arabicAcikkuranData = null;
 let arabicData = null;
 let mealData = null;
-let phoneticData = null;
+let referenceReadings = null;
 let wbwMeaningsData = null;
 let currentSurah = 1;
 let currentMode = 'turkish';
@@ -867,13 +882,13 @@ function applyTheme(theme) {
 
 // === Data Loading ===
 async function loadData() {
-  const [translitRes, tajweedRes, arabicRes, arabicAkRes, mealRes, phoneticRes, wbwMeaningsRes] = await Promise.all([
+  const [translitRes, tajweedRes, arabicRes, arabicAkRes, mealRes, referenceRes, wbwMeaningsRes] = await Promise.all([
     fetch('../output/turkish-syllables.json'),
     fetch('../output/turkish-syllables-tajweed.json'),
     fetch('../data/arabic-uthmani.json?v=2'),
     fetch('../data/arabic-acikkuran.json'),
     fetch('../data/diyanet-meal.json'),
-    fetch('../data/acikkuran-turkish-phonetic.json'),
+    fetch('../data/muhammet-abay.json'),
     fetch('../data/wbw-turkish-meanings.json'),
   ]);
   translitData = await translitRes.json();
@@ -882,7 +897,9 @@ async function loadData() {
   arabicAcikkuranData = await arabicAkRes.json();
   arabicData = currentSource === 'acikkuran' ? arabicAcikkuranData : arabicUthmaniData;
   mealData = await mealRes.json();
-  phoneticData = await phoneticRes.json();
+  const reference = await referenceRes.json();
+  referenceReadings = Object.fromEntries(reference.quran.map(({chapter, verse, text}) =>
+    [`${chapter}:${verse}`, text]));
   wbwMeaningsData = await wbwMeaningsRes.json();
 }
 
@@ -1057,7 +1074,8 @@ function renderSurah(surahNum) {
 
     html += `<div class="verse" data-verse="${v}">`;
 
-    if (translit.length !== arabicWords.length || !translit.length) {
+    const hasAlignment = translit.length > 0 && translit.length === arabicWords.length;
+    if (!hasAlignment) {
       html += `<div class="verse-arabic">${arabic} <span class="ayah-badge">${v}</span></div>`;
       html += '<div class="verse-translation" lang="tr">Bu ayetin Türkçe kelime hizalaması doğrulanamadı.</div>';
     } else if (currentMode === 'wbw') {
@@ -1087,6 +1105,14 @@ function renderSurah(surahNum) {
       html += '</div>';
     }
 
+    const reading = referenceReadings[key];
+    if (reading) {
+      const escaped = reading.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html += `<details class="verse-reference" lang="tr" dir="ltr"${hasAlignment ? '' : ' open'}>
+        <summary>Türkçe çeviriyazı · Muhammet Abay</summary>
+        <div>${escaped}</div>
+      </details>`;
+    }
     const meal = mealData?.[key];
     if (meal) {
       html += `<div class="verse-translation"><span class="ayah-num">${v}.</span>${meal}</div>`;
