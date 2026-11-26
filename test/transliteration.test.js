@@ -42,10 +42,13 @@ test("both readers contain the same complete corpus and mark unresolved alignmen
       continue;
     }
     assert.equal(words.length, wbw[key].length, key);
-    assert.equal(words.length, arabic[key].trim().split(/\s+/u).length, key);
+    // The Arabic dataset uses NBSP inside a single reading group.
+    assert.equal(words.length, arabic[key].split(" ").length, key);
     assert.ok(words.every(word => spelling(word).length > 0), key);
     assert.equal(spelling(words.join("")), spelling(source[key]), key);
   }
+  assert.deepEqual(arabic["37:130"].split(" ").map(group => group.split("\u00a0").length), [1, 1, 2]);
+  assert.deepEqual(arabic, require("../apk-build/www/data/arabic-uthmani.json"));
   assert.deepEqual(basic, require("../apk-build/www/output/turkish-syllables.json"));
   assert.deepEqual(tajweed, require("../apk-build/www/output/turkish-syllables-tajweed.json"));
 });

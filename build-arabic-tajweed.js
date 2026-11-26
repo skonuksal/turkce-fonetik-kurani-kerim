@@ -28,7 +28,7 @@ const wbw = JSON.parse(
 // Cases where the Arabic source splits a word that WBW (and recitation) treats as one.
 const MANUAL_JOINS = {
   "8:6": [3], // بَعْدَ + مَا → بَعْدَ‍مَا
-  "37:130": [1], // إِلْ + يَاسِينَ → إِلْ‍يَاسِينَ
+  "37:130": [2], // إِلْ + يَاسِينَ → إِلْ‍يَاسِينَ
 };
 
 function cleanVerse(raw) {
