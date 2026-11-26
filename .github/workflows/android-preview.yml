@@ -1,0 +1,41 @@
+name: Android okunuş denetimi
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'data/**'
+      - 'output/**'
+      - 'demo/**'
+      - 'apk-build/**'
+      - 'test/**'
+      - 'generate.js'
+      - '.github/workflows/android-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run generate && npm test
+      - run: git diff --exit-code -- output apk-build/www/output
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci && npx --no-install cap sync android
+        working-directory: apk-build
+      - run: bash gradlew assembleDebug --no-daemon
+        working-directory: apk-build/android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: turkce-fonetik-onizleme
+          path: apk-build/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

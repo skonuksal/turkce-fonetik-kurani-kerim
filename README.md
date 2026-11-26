@@ -129,6 +129,12 @@ npm run generate
 # output/turkish-syllables.json ve turkish-syllables-tajweed.json yenilenir
 ```
 
+### Okunuşu denetleme
+
+`npm run generate` temel ve tecvid verilerini hem web hem Android kaynaklarına yazar. `npm test`, temel okunuştaki harfleri ve kesme işaretlerini Açık Kuran metniyle karşılaştırır. Karşılaştırma, boşlukları, hece tirelerini ve cümle noktalamasını atlar. Eşleşmeyen ayetlerin numaraları üretim sırasında listelenir. Okuyucu bu ayetlerin Arapçasını ve mealini gösterir, okunuş alanında hizalama durumunu bildirir.
+
+Bu denetim Türkçe kaynağın korunmasını ölçer. Mahreç, med, vakıf ve vasıl ile tek tek kelime ve hece sınırlarının doğruluğu ayrıca denetlenmelidir.
+
 ### Web demo
 
 ```bash

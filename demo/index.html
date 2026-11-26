@@ -1057,7 +1057,10 @@ function renderSurah(surahNum) {
 
     html += `<div class="verse" data-verse="${v}">`;
 
-    if (currentMode === 'wbw') {
+    if (translit.length !== arabicWords.length || !translit.length) {
+      html += `<div class="verse-arabic">${arabic} <span class="ayah-badge">${v}</span></div>`;
+      html += '<div class="verse-translation" lang="tr">Bu ayetin Türkçe kelime hizalaması doğrulanamadı.</div>';
+    } else if (currentMode === 'wbw') {
       const groups = groupByTurkish(arabicWords, translit);
       html += '<div class="verse-wbw">';
       for (const group of groups) {

@@ -86,7 +86,7 @@ function buildWBWNormalized(words) {
  */
 function buildTurkishNormalized(text) {
   // Pre-clean: fix Turkish dotted i (i + combining dot above)
-  const cleaned = text.replace(/i\u0307/g, "i");
+  const cleaned = text.toLocaleLowerCase("tr").replace(/i\u0307/g, "i").normalize("NFC");
 
   const noSpacesChars = [];
   const normChars = [];
@@ -97,7 +97,7 @@ function buildTurkishNormalized(text) {
 
   for (let i = 0; i < cleaned.length; i++) {
     const ch = cleaned[i];
-    if (ch === " ") {
+    if (/\s/u.test(ch)) {
       inToken = false;
       continue;
     }
@@ -134,7 +134,7 @@ function buildTurkishNormalized(text) {
  *
  * @param {string[]} wbwWords - QuranWBW word array (e.g. ["Maa-li-ki", "Yaw-mid-", "Deen"])
  * @param {string} turkishText - Turkish phonetic text (e.g. "maliki yevmid din")
- * @returns {string[]} Turkish transliteration with syllable structure (e.g. ["Ma-li-ki", "Yev-mid-", "Din"])
+ * @returns {{words: string[], startTokens: number[], endTokens: number[]}} Empty arrays flag an unresolved verse.
  */
 function convertVerse(wbwWords, turkishText) {
   const wbw = buildWBWNormalized(wbwWords);
@@ -162,24 +162,40 @@ function convertVerse(wbwWords, turkishText) {
     }
 
     if (turkNormStart === -1) {
-      result.push(wbwWords[w]);
-      startTokens.push(-1);
-      endTokens.push(-1);
-      continue;
+      return { words: [], startTokens: [], endTokens: [] };
     }
 
     // Map to original Turkish text positions (without spaces)
-    const origStart = turkish.normToNoSpacesMap[turkNormStart];
-    const origEnd = turkish.normToNoSpacesMap[turkNormEnd];
+    let origStart = turkish.normToNoSpacesMap[turkNormStart];
+    let origEnd = turkish.normToNoSpacesMap[turkNormEnd];
+    // Extend to the edge of the Turkish token where the neighbouring WBW
+    // word is anchored in a different token. Keep ambiguous boundaries intact.
+    const tokenAt = turkish.noSpacesToToken;
+    const positions = turkish.normToNoSpacesMap;
+    let before = wordRange.start - 1;
+    while (before >= 0 && mapping[before] === -1) before--;
+    let after = wordRange.end;
+    while (after < mapping.length && mapping[after] === -1) after++;
+    const left = before < 0 ? -1 : positions[mapping[before]];
+    const right = after === mapping.length ? tokenAt.length : positions[mapping[after]];
+    if (tokenAt[left] !== tokenAt[origStart]) {
+      while (origStart > 0 && tokenAt[origStart - 1] === tokenAt[origStart]) origStart--;
+    }
+    if (tokenAt[right] !== tokenAt[origEnd]) {
+      while (origEnd + 1 < right && tokenAt[origEnd + 1] === tokenAt[origEnd]) origEnd++;
+    }
+    // An apostrophe between two word anchors belongs to the boundary. Keep
+    // it once, at the start of the following slice, when the token is shared.
+    if (tokenAt[left] === tokenAt[origStart] &&
+        turkish.noSpaces.slice(left + 1, origStart) === "'") {
+      origStart--;
+    }
     const turkishWord = turkish.noSpaces.slice(origStart, origEnd + 1);
     const wordStartToken = turkish.noSpacesToToken[origStart];
     const wordEndToken = turkish.noSpacesToToken[origEnd];
 
     if (turkishWord.length === 0) {
-      result.push(wbwWords[w]);
-      startTokens.push(-1);
-      endTokens.push(-1);
-      continue;
+      return { words: [], startTokens: [], endTokens: [] };
     }
 
     // Apply syllable structure
@@ -275,6 +291,12 @@ function convertVerse(wbwWords, turkishText) {
     endTokens.push(wordEndToken);
   }
 
+  // Compare the original Turkish spelling, including apostrophes and accents.
+  // Only layout and sentence punctuation may have been supplied by WBW.
+  const spelling = value => value.replace(/[\s.,;!?\u2015-]/gu, "");
+  if (spelling(result.join("")) !== spelling(turkish.noSpaces)) {
+    return { words: [], startTokens: [], endTokens: [] };
+  }
   return { words: result, startTokens, endTokens };
 }
 
@@ -294,25 +316,13 @@ function convertAll(wbwData, turkishData) {
   const errorVerses = [];
 
   for (const [verse, words] of Object.entries(wbwData)) {
-    if (!turkishData[verse]) {
-      result[verse] = words;
-      startTokens[verse] = words.map((_, i) => i);
-      endTokens[verse] = words.map((_, i) => i);
-      errors++;
-      errorVerses.push(verse);
-      continue;
-    }
-
-    try {
-      const r = convertVerse(words, turkishData[verse]);
-      result[verse] = r.words;
-      startTokens[verse] = r.startTokens;
-      endTokens[verse] = r.endTokens;
+    const r = convertVerse(words, turkishData[verse] || "");
+    result[verse] = r.words;
+    startTokens[verse] = r.startTokens;
+    endTokens[verse] = r.endTokens;
+    if (r.words.length) {
       processed++;
-    } catch (e) {
-      result[verse] = words;
-      startTokens[verse] = words.map((_, i) => i);
-      endTokens[verse] = words.map((_, i) => i);
+    } else {
       errors++;
       errorVerses.push(verse);
     }

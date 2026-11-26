@@ -92,12 +92,8 @@ function wbwLastConsonant(wbwWord) {
 }
 
 function trLastConsonantInfo(trWord) {
-  // Find index of last consonant ignoring trailing punctuation/dashes
-  for (let i = trWord.length - 1; i >= 0; i--) {
-    const ch = trWord[i];
-    if (/[bcdfghjklmnpqrstvxyz]/.test(ch)) return { index: i, char: ch };
-  }
-  return null;
+  const ending = /([nm])[-.,;!?]*$/u.exec(trWord);
+  return ending ? { index: ending.index, char: ending[1] } : null;
 }
 
 function applyTajweedMarks(wbwWord, turkishWord, arabicWord, nextArabicWord) {
@@ -124,7 +120,7 @@ function applyTajweedMarks(wbwWord, turkishWord, arabicWord, nextArabicWord) {
   //    when they differ. Only when Turkish ends in n/m and WBW ends in m/v/y/l/r.
   const trLast = trLastConsonantInfo(trResult);
   const wbwLast = wbwLastConsonant(wbwWord);
-  if (trLast && wbwLast && trLast.char !== wbwLast) {
+  if (nextArabicWord && trLast && wbwLast && trLast.char !== wbwLast) {
     if (/[nm]/.test(trLast.char) && /[mvylr]/.test(wbwLast)) {
       trResult = trResult.slice(0, trLast.index) + wbwLast + trResult.slice(trLast.index + 1);
       idgamApplied = true;
@@ -284,11 +280,6 @@ for (const [verse, words] of Object.entries(result)) {
   );
 }
 
-fs.writeFileSync(
-  path.join(__dirname, "output/turkish-syllables.json"),
-  JSON.stringify(basicResult, null, 2),
-  "utf-8"
-);
 
 // Helpers for shamsi idgam detection across token boundaries
 function firstConsonant(w) {
@@ -333,11 +324,16 @@ for (const [verse, words] of Object.entries(result)) {
   });
 }
 
-fs.writeFileSync(
-  path.join(__dirname, "output/turkish-syllables-tajweed.json"),
-  JSON.stringify(tajweedResult, null, 2),
-  "utf-8"
-);
+// Both readers load these JSON files directly.
+for (const [file, verses] of [
+  ["turkish-syllables.json", basicResult],
+  ["turkish-syllables-tajweed.json", tajweedResult],
+]) {
+  const json = JSON.stringify(verses, null, 2);
+  for (const dir of ["output", "apk-build/www/output"]) {
+    fs.writeFileSync(path.join(__dirname, dir, file), json, "utf-8");
+  }
+}
 
 console.log(`Done. ${stats.processed} ayet islendi, ${stats.errors} hata.`);
 

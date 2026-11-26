@@ -4,7 +4,8 @@
   "description": "Kur'an-i Kerim Turkce satir arasi (word-by-word) heceli transliterasyon. QuranWBW hece yapisi + Acik Kuran Turkce fonetik verisi birlestirilmistir.",
   "main": "src/index.js",
   "scripts": {
-    "generate": "node generate.js"
+    "generate": "node generate.js",
+    "test": "node --test"
   },
   "keywords": [
     "quran",
