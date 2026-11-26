@@ -33,12 +33,12 @@ jobs:
           java-version: 21
       - run: npm ci && npx --no-install cap sync android
         working-directory: apk-build
-      - run: bash gradlew assembleDebug --no-daemon
+      - run: bash gradlew assemblePreview --no-daemon
         working-directory: apk-build/android
       - name: APK içindeki okuyucuda mobil dokunmayı denetle
         run: |
           npm install --prefix "$RUNNER_TEMP/reader-check" --no-audit --no-fund playwright-core@1.56.1
-          unzip -q apk-build/android/app/build/outputs/apk/debug/app-debug.apk 'assets/public/*' -d "$RUNNER_TEMP/reader-apk"
+          unzip -q apk-build/android/app/build/outputs/apk/preview/app-preview.apk 'assets/public/*' -d "$RUNNER_TEMP/reader-apk"
           python3 -m http.server 4173 --bind 127.0.0.1 --directory "$RUNNER_TEMP/reader-apk/assets/public" > "$RUNNER_TEMP/reader-http.log" 2>&1 &
           trap 'kill $!' EXIT
           curl --silent --fail --retry 8 --retry-connrefused http://127.0.0.1:4173/ -o /dev/null
@@ -46,5 +46,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: turkce-fonetik-onizleme
-          path: apk-build/android/app/build/outputs/apk/debug/app-debug.apk
+          path: apk-build/android/app/build/outputs/apk/preview/app-preview.apk
           if-no-files-found: error
