@@ -10,14 +10,16 @@ Kur'an-ı Kerim'i **Arapça metniyle birebir hizalı, uzun ünlülü ve tecvid i
 
 - **6.236 ayetin tamamında (77.429 Arapça kelime) %100 hizalı birleşik Türkçe fonetik:**
   - Uzun ünlüler (`â, î, û`), kalın/ince ünlü ayrımı (`ı/i`, `ü/u`), gerçek okunuş (idğâm/iklâb/şemsî bağlama), nûn-u kutnî ve mîm-i cem' kuralları
-- **Üç okuma modu:**
-  - **Türkçe:** Her Arapça kelimeye dokununca heceli okunuşu ve bağlantılı grubun birleşik okunuşu açılır
-  - **Arapça:** Her kelime bağımsız dokunma balonuyla gösterilir
-  - **Kelime:** Birbirine bağlanarak okunan kelimeler tek kartta gruplanır; heceli okunuş + kelime anlamı satır altında görünür
-- **İki okunuş seviyesi + uygulama içi Tecvid İşaretleri Rehberi:** **Temel** / **Tecvid** (`z̲, s̲, ż̲, ḋ, ṫ, h̄, ḣ, g, ğ`)
-- **İki Arapça hat:** **Mushaf** (Uthmânî) / **Diyanet** (Açık Kuran)
+- **İki okuma modu (`Okuma` / `Kelime`):**
+  - **Okuma:** Arapça Mushaf akışı; bağlı okunan kelimeler arasında görsel bağlama yayı (`◡`) ve dokununca fonetik baloncuk
+  - **Kelime:** Bağlı okunan kelimeleri tek kartta gruplayan veya ayrı ayrı gösteren kelime kelime satır arası görünüm
+- **Ayrı Okunuş Ayarları paneli:**
+  - **Okunuş Seviyesi:** **Temel** / **Tecvid** (`z̲, s̲, ż̲, ḋ, ṫ, h̄, ḣ, g, ğ`) + uygulama içi **Tecvid İşaretleri Rehberi**
+  - **Telaffuz Stili:** **Pratik Türkçe** (`ve-kâ-nal-lâ-hu · ve-lad-dâl-lîn`) / **Klasik (Abay)** (`ve-kâ-nel-lâ-hü · ve-led-dâl-lîn`)
+  - **Opsiyonel QoL anahtarları:** Hece tireleri, geçiş bağlama yayı ve gruplama, uzun ünlü şapkaları (`â î û`), ayet altı tam Türkçe okunuş, Meal, Kelime Anlamı, Sure Başı Besmele, Sayfa & Cüz Ayraçları
+- **İki Arapça hat (çevrimdışı `Scheherazade New` fontuyla):** **Mushaf** (Uthmânî) / **Diyanet** (Açık Kuran)
 - **Dört tema:** Papirüs, Deniz, Gece, Bordo
-- **Kolay gezinme:** 114 sure (Türkçe arama destekli), 30 cüz, 604 sayfa seçicileri, sure başı Besmele, sure sonu Önceki/Sonraki geçişi, Meal & Kelime Anlamı aç/kapat
+- **Obtainium ile otomatik güncelleme:** `https://github.com/skonuksal/turkce-fonetik-kurani-kerim` reposunu Obtainium’a eklemeniz yeterli; her yeni sürüm (`v*`) otomatik olarak `turkce-fonetik-kurani-kerim.apk` olarak yayınlanır.
 - **Tamamen çevrimdışı & yerel:** Ayarlar ve son okunan yer cihazda saklanır (`localStorage`)
 
 ## Tecvid İşaretleri

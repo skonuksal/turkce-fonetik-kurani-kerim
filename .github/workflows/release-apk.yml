@@ -1,0 +1,79 @@
+name: Release APK (Obtainium)
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Yayınlanacak sürüm etiketi (örn. v1.2.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm run generate && npm test
+      - run: git diff --exit-code -- output apk-build/www/output
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Release imza anahtarını doğrula ve hazırla
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASS" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 ve ANDROID_KEYSTORE_PASSWORD repository secrets tanımlı olmalı."
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.p12"
+
+      - run: npm ci && npx --no-install cap sync android
+        working-directory: apk-build
+
+      - name: İmzalı Release APK derle
+        working-directory: apk-build/android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.p12
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: release
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: bash gradlew assembleRelease --no-daemon
+
+      - name: APK içindeki okuyucuda mobil dokunmayı denetle
+        run: |
+          npm install --prefix "$RUNNER_TEMP/reader-check" --no-audit --no-fund playwright-core@1.56.1
+          unzip -q apk-build/android/app/build/outputs/apk/release/app-release.apk 'assets/public/*' -d "$RUNNER_TEMP/reader-apk"
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory "$RUNNER_TEMP/reader-apk/assets/public" > "$RUNNER_TEMP/reader-http.log" 2>&1 &
+          trap 'kill $!' EXIT
+          curl --silent --fail --retry 8 --retry-connrefused http://127.0.0.1:4173/ -o /dev/null
+          NODE_PATH="$RUNNER_TEMP/reader-check/node_modules" node checks/reader-tap.cjs
+
+      - name: GitHub Release yayınla (Obtainium uyumlu)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          cp apk-build/android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/turkce-fonetik-kurani-kerim.apk"
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release upload "$TAG_NAME" "$RUNNER_TEMP/turkce-fonetik-kurani-kerim.apk" --clobber
+          else
+            gh release create "$TAG_NAME" "$RUNNER_TEMP/turkce-fonetik-kurani-kerim.apk" \
+              --title "$TAG_NAME" \
+              --generate-notes
+          fi
