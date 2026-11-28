@@ -38,16 +38,16 @@ const { basicResult, tajweedResult, classicDiff, processed } = generateAllUnifie
   abayMap
 );
 
-// Both web demo and Android APK load these JSON files directly.
-for (const [file, payload, compact] of [
+// Web demo keeps readable output/; Android APK bundle uses compact JSON for smaller APK & faster startup.
+for (const [file, payload, alwaysCompact] of [
   ["turkish-syllables.json", basicResult, false],
   ["turkish-syllables-tajweed.json", tajweedResult, false],
   ["turkish-classic-diff.json", classicDiff, true],
 ]) {
-  const json = compact ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
-  for (const dir of ["output", "apk-build/www/output"]) {
-    fs.writeFileSync(path.join(__dirname, dir, file), json, "utf-8");
-  }
+  const compactJson = JSON.stringify(payload);
+  const prettyJson = alwaysCompact ? compactJson : JSON.stringify(payload, null, 2);
+  fs.writeFileSync(path.join(__dirname, "output", file), prettyJson, "utf-8");
+  fs.writeFileSync(path.join(__dirname, "apk-build/www/output", file), compactJson, "utf-8");
 }
 
 const classicDiffVerses = Object.keys(classicDiff.b).length;

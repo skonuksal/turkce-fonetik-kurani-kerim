@@ -122,9 +122,6 @@ test("web demo and Android APK bundles are identical and free of unused data", (
     ["../demo/index.html", "../apk-build/www/index.html"],
     ["../demo/fonts/ScheherazadeNew-Regular.woff2", "../apk-build/www/fonts/ScheherazadeNew-Regular.woff2"],
     ["../demo/fonts/ScheherazadeNew-Bold.woff2", "../apk-build/www/fonts/ScheherazadeNew-Bold.woff2"],
-    ["../output/turkish-syllables.json", "../apk-build/www/output/turkish-syllables.json"],
-    ["../output/turkish-syllables-tajweed.json", "../apk-build/www/output/turkish-syllables-tajweed.json"],
-    ["../output/turkish-classic-diff.json", "../apk-build/www/output/turkish-classic-diff.json"],
     ["../data/arabic-uthmani.json", "../apk-build/www/data/arabic-uthmani.json"],
     ["../data/arabic-acikkuran.json", "../apk-build/www/data/arabic-acikkuran.json"],
     ["../data/diyanet-meal.json", "../apk-build/www/data/diyanet-meal.json"],
@@ -136,14 +133,30 @@ test("web demo and Android APK bundles are identical and free of unused data", (
     );
   }
 
+  for (const [a, b] of [
+    ["../output/turkish-syllables.json", "../apk-build/www/output/turkish-syllables.json"],
+    ["../output/turkish-syllables-tajweed.json", "../apk-build/www/output/turkish-syllables-tajweed.json"],
+    ["../output/turkish-classic-diff.json", "../apk-build/www/output/turkish-classic-diff.json"],
+  ]) {
+    assert.deepEqual(
+      JSON.parse(fs.readFileSync(require.resolve(a), "utf8")),
+      JSON.parse(fs.readFileSync(require.resolve(b), "utf8")),
+      `${a} JSON content differs from ${b}`
+    );
+  }
+
   // Ensure dead runtime assets are not shipped in APK
   const wwwDataDir = path.join(__dirname, "../apk-build/www/data");
-  const wwwFiles = fs.readdirSync(wwwDataDir).sort();
-  assert.deepEqual(wwwFiles, [
+  assert.deepEqual(fs.readdirSync(wwwDataDir).sort(), [
     "arabic-acikkuran.json",
     "arabic-uthmani.json",
     "diyanet-meal.json",
     "wbw-turkish-meanings.json",
+  ]);
+  const wwwFontsDir = path.join(__dirname, "../apk-build/www/fonts");
+  assert.deepEqual(fs.readdirSync(wwwFontsDir).sort(), [
+    "ScheherazadeNew-Bold.woff2",
+    "ScheherazadeNew-Regular.woff2",
   ]);
 });
 

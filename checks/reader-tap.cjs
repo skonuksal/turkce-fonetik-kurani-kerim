@@ -18,9 +18,13 @@ async function main() {
     });
     assert.equal(arabicFontLoaded, true, 'Scheherazade New offline font failed to load');
 
-    // P0 check: Turkish search handles İ/ı/â folding ("ihlas" finds 112. İhlâs)
+    // P0 check: Turkish search handles İ/ı/â folding ("ihlas" finds 112. İhlâs) + famous shortcuts + direct ref
     await page.locator('#surahSearch').fill('ihlas');
     assert.equal(await page.locator('.surah-item[data-surah="112"]').count(), 1);
+    await page.locator('#surahSearch').fill('ayetel kürsi');
+    assert.equal(await page.locator('[data-jump-surah="2"][data-jump-verse="255"]').count(), 1);
+    await page.locator('#surahSearch').fill('48:4');
+    assert.equal(await page.locator('[data-jump-surah="48"][data-jump-verse="4"]').count(), 1);
     await page.locator('#surahSearch').fill('');
 
     // P0 check: switching Arapça source (Mushaf/Diyanet) must NOT reset selected theme
@@ -132,6 +136,18 @@ async function main() {
     await nisa.last().tap();
     await tooltip.waitFor({state: 'visible'});
     assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'mü-bî-nâ');
+
+    // Surah 96 (Alak): Secde Ayeti badge on 96:19 + Bookmark via verse badge + Continue card on Home
+    await page.locator('#surahSelectReader').selectOption('96');
+    assert.equal(await page.locator('.verse[data-verse="19"] .sajdah-badge').count(), 1);
+    await page.locator('.verse[data-verse="19"] [data-verse-action="19"]').tap();
+    await page.locator('.verse-menu').waitFor({state: 'visible'});
+    await page.locator('.verse-menu-btn', { hasText: 'Burada Kaldım' }).tap();
+    assert.equal(await page.locator('.verse[data-verse="19"] [data-verse-action="19"].bookmarked').count(), 1);
+    await page.locator('#backBtn').tap();
+    await page.locator('#continueBtn').waitFor({state: 'visible'});
+    assert.match(await page.locator('#continueBtn').textContent(), /96:19/);
+    await page.locator('#continueBtn').tap();
 
     // Check every packaged Arabic position across both Arabic sources & both levels.
     const checks = await page.evaluate(() => {

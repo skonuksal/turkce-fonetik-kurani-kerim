@@ -19,8 +19,9 @@ Kur'an-ı Kerim'i **Arapça metniyle birebir hizalı, uzun ünlülü ve tecvid i
   - **Opsiyonel QoL anahtarları:** Hece tireleri, geçiş bağlama ve gruplama, uzun ünlü şapkaları (`â î û`), ayet altı tam Türkçe okunuş, Meal, Kelime Anlamı, Sure Başı Besmele, Sayfa & Cüz Ayraçları
 - **İki Arapça hat (çevrimdışı `Scheherazade New` fontuyla):** **Mushaf** (Uthmânî) / **Diyanet** (Açık Kuran)
 - **Dört tema:** Papirüs, Deniz, Gece, Bordo
+- **Akıllı arama & QoL:** 114 sure, doğrudan `sure:ayet` (`48:4`), meşhur ayet kısayolları (`Âyetel Kürsî`, `Âmenerrasûlü`, `Hüvallâhüllezî`) ve tam **Diyanet Meali** araması; ana ekranda **"Kaldığın Yerden Devam Et"** kartı; ayet rozetinden **Burada Kaldım / Kopyala / Paylaş**; 14 tilavet secdesi ayeti rozeti (`۩ Secde Ayeti`); okurken **Ekranı Açık Tut (Wake Lock)**
 - **Obtainium ile otomatik güncelleme:** `https://github.com/skonuksal/turkce-fonetik-kurani-kerim` reposunu Obtainium’a eklemeniz yeterli; her yeni sürüm (`v*`) otomatik olarak `turkce-fonetik-kurani-kerim.apk` olarak yayınlanır.
-- **Tamamen çevrimdışı & yerel:** Ayarlar ve son okunan yer cihazda saklanır (`localStorage`)
+- **Tamamen çevrimdışı & izinsiz:** Fontlar dahil tüm veriler yereldir; Android APK’sında `INTERNET` izni bulunmaz. Ayarlar ve yer imi sadece cihazda saklanır (`localStorage`).
 
 ## Tecvid İşaretleri
 
