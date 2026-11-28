@@ -36,11 +36,12 @@ async function main() {
     const verse = page.locator('.verse[data-verse="1"]');
     const tooltip = page.getByRole('tooltip');
 
-    // Okuma mode: 2-mode toggle (Okuma / Kelime) + word bubble + Birlikte context
+    // Okuma mode: 2-mode toggle (Okuma / Kelime) + visible Arabic liaison ties + word bubble
     assert.equal(await page.locator('.mode-btn').count(), 2);
     await page.locator('[data-mode="reading"]').tap();
     const buttons = verse.locator('button[data-translit]');
     assert.equal(await buttons.count(), 4);
+    assert.equal(await verse.locator('.liaison-mark').count(), 3);
     for (const [index, expected] of [[0, 'bis-mil-'], [1, 'lâ-hir-']]) {
       await buttons.nth(index).tap();
       await tooltip.waitFor({state: 'visible'});
@@ -80,6 +81,7 @@ async function main() {
     await page.locator('#closeReadingBtn').tap();
 
     await page.locator('[data-mode="reading"]').tap();
+    assert.equal(await verse.locator('.liaison-mark').count(), 0);
     assert.equal(await verse.locator('.verse-phonetic').textContent(), 'bismil lahir rahmanir rahim');
     await buttons.first().tap();
     await tooltip.waitFor({state: 'visible'});
