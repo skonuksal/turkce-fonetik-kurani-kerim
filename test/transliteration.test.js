@@ -120,6 +120,8 @@ test("all 6,236 verses and 77,429 words align 100% with zero academic symbol lea
 test("web demo and Android APK bundles are identical and free of unused data", () => {
   for (const [a, b] of [
     ["../demo/index.html", "../apk-build/www/index.html"],
+    ["../demo/fonts/ScheherazadeNew-Regular.woff2", "../apk-build/www/fonts/ScheherazadeNew-Regular.woff2"],
+    ["../demo/fonts/ScheherazadeNew-Bold.woff2", "../apk-build/www/fonts/ScheherazadeNew-Bold.woff2"],
     ["../output/turkish-syllables.json", "../apk-build/www/output/turkish-syllables.json"],
     ["../output/turkish-syllables-tajweed.json", "../apk-build/www/output/turkish-syllables-tajweed.json"],
     ["../output/turkish-classic-diff.json", "../apk-build/www/output/turkish-classic-diff.json"],

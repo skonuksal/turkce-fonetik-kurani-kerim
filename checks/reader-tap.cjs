@@ -11,6 +11,13 @@ async function main() {
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('http://127.0.0.1:4173/');
 
+    // Ensure bundled offline Arabic font (Scheherazade New) loads with zero network calls
+    const arabicFontLoaded = await page.evaluate(async () => {
+      const loaded = await document.fonts.load('16px "Scheherazade New"', '\u0628\u0650\u0633\u0652\u0645\u0650');
+      return loaded.some(f => f.family.includes('Scheherazade New') && f.status === 'loaded');
+    });
+    assert.equal(arabicFontLoaded, true, 'Scheherazade New offline font failed to load');
+
     // P0 check: Turkish search handles İ/ı/â folding ("ihlas" finds 112. İhlâs)
     await page.locator('#surahSearch').fill('ihlas');
     assert.equal(await page.locator('.surah-item[data-surah="112"]').count(), 1);
