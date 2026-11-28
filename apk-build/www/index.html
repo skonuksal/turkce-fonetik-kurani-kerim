@@ -422,29 +422,6 @@
       color: var(--color-on-accent);
     }
 
-    /* Visual Arabic word-to-word liaison tie (vasl / idgam cue) */
-    .liaison-mark {
-      display: inline-block;
-      width: 0.46em;
-      height: 0.24em;
-      margin: 0 -0.02em;
-      vertical-align: -0.05em;
-      color: var(--color-highlight);
-      opacity: 0.82;
-      pointer-events: none;
-      user-select: none;
-    }
-    .liaison-mark svg {
-      display: block;
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-    .wbw-word.active .liaison-mark {
-      color: var(--color-on-accent);
-      opacity: 0.92;
-    }
-
     .ayah-badge {
       display: inline-flex;
       align-items: center;
@@ -1213,7 +1190,7 @@
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="groupLiaison">
           <div class="toggle-info">
             <div class="toggle-title">Geçiş Bağlama &amp; Birleştirme</div>
-            <div class="toggle-desc">Arapça kelimeler arasında bağlama yayı ve grup kartları gösterir</div>
+            <div class="toggle-desc">Bağlı okunan kelimeleri gruplar ve baloncukta gösterir</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
@@ -1288,7 +1265,7 @@
         <tr><td class="guide-mark">h&#772;</td><td class="guide-ar">&#1581;</td><td>Boğazdan kalın h (hâ)</td><td>rah&#772;-mân</td></tr>
         <tr><td class="guide-mark">g</td><td class="guide-ar">&#1602;</td><td>Kalın k (kâf)</td><td>gul, ga-rî-bâ</td></tr>
         <tr><td class="guide-mark">ğ</td><td class="guide-ar">&#1594;</td><td>Yumuşak g (ğayın)</td><td>ğay-ril-mağ-d&#775;û-bi</td></tr>
-        <tr><td class="guide-mark"><span class="liaison-mark" style="width:20px;height:10px;opacity:1"><svg viewBox="0 0 18 8"><path d="M1.5 1.5 Q9 8 16.5 1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></td><td>Bağ</td><td>İki kelimeyi birleştirerek oku</td><td>ve-kâ-nal-lâ-hu</td></tr>
+        <tr><td class="guide-mark">-</td><td>Bağ</td><td>Hece / idğâm geçişi</td><td>ve-kâ-nal-lâ-hu</td></tr>
       </tbody>
     </table>
     <button type="button" class="guide-close-btn" id="closeGuideBtn">Kapat</button>
@@ -1661,8 +1638,6 @@ function goHome(fromPopstate) {
   }
 }
 
-const LIAISON_TIE_HTML = '<span class="liaison-mark" aria-hidden="true"><svg viewBox="0 0 18 8"><path d="M1.5 1.5 Q9 8 16.5 1.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>';
-
 // === Reader ===
 function renderSurah(surahNum) {
   closeTooltip();
@@ -1712,9 +1687,7 @@ function renderSurah(surahNum) {
       html += wbw ? '<div class="verse-wbw">' : '<div class="verse-arabic">';
       for (const group of groups) {
         if (wbw) {
-          const arText = toggles.groupLiaison && group.arabic.length > 1
-            ? group.arabic.join(' ' + LIAISON_TIE_HTML + ' ')
-            : group.arabic.join(' ');
+          const arText = group.arabic.join(' ');
           const cardReading = formatGroupReading(group, translit);
           const info = toggles.groupLiaison && group.indices.length > 1
             ? 'Birlikte: ' + formatConnectedFluent(group)
@@ -1734,13 +1707,11 @@ function renderSurah(surahNum) {
           const context = toggles.groupLiaison && group.indices.length > 1
             ? formatConnectedFluent(group)
             : '';
-          for (let gi = 0; gi < group.indices.length; gi++) {
-            const i = group.indices[gi];
+          for (const i of group.indices) {
             const wordReading = formatSingleWord(translit[i]);
             const info = context ? 'Birlikte: ' + context : '';
             const attrs = `type="button" data-translit="${escapeHtml(wordReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
-            const sep = (toggles.groupLiaison && gi < group.indices.length - 1) ? LIAISON_TIE_HTML : ' ';
-            html += `<button class="word" lang="ar" ${attrs}>${arabicWords[i]}</button>${sep}`;
+            html += `<button class="word" lang="ar" ${attrs}>${arabicWords[i]}</button> `;
           }
         }
       }
