@@ -16,6 +16,15 @@ const COMBINING_MACRON = "\u0304"; // kalın ح
 
 const VOWELS = new Set([..."aeıioöuüâîû"]);
 const KALIN_ABAY = new Set(["ṣ", "ḍ", "ṭ", "ż", "ḳ", "ḫ", "g"]);
+const STRIP_WAQF = /[\u06D6-\u06ED]/g;
+// Standalone Lafzatullah that links to a preceding word (ٱللَّهُ / ٱللَّهَ / ٱللَّهِ / ٱللَّهُمَّ)
+const AR_LAFZATULLAH_HEAD = /^\u0671\u0644\u0644\u0651\u064E\u0647(?:\u064F\u0645\u0651\u064E|[\u064E\u064F\u0650])?$/u;
+// Prefixed thick Lafzatullah (وَٱللَّهُ, وَٱللَّهِ, فَٱللَّهُ, تَٱللَّهِ, وَتَٱللَّهِ, ءَآللَّهُ)
+const AR_LAFZATULLAH_PREFIXED_THICK = /^(?:\u0648\u064E|\u0641\u064E|\u062A\u064E|\u0648\u064E\u062A\u064E|\u0621\u064E\u0627\u0653)\u0671?\u0644\u0644\u0651\u064E\u0647[\u064E\u064F\u0650]?$/u;
+// Nominative Lafzatullah ending in damme (ٱللَّهُ, وَٱللَّهُ, فَٱللَّهُ, ءَآللَّهُ — excludes ٱللَّهُمَّ)
+const AR_LAFZATULLAH_DAMME = /^(?:(?:\u0648\u064E|\u0641\u064E|\u0621\u064E\u0627\u0653)?\u0671|\u0621\u064E\u0627\u0653)\u0644\u0644\u0651\u064E\u0647\u064F$/u;
+// Emphatic (kalın) Arabic consonants whose shifted coda backs a preceding Turkish 'e'/'ü'
+const EMPHATIC_LIAISON = new Set(["ṣ", "ḍ", "ṭ", "ż"]);
 
 const MUKATTAA_SKELETON = {
   "الم": "eliflammim",
@@ -262,13 +271,43 @@ function alignAbayToArabic(verseKey, arWords, abayText) {
 }
 
 /**
- * Shift liaison codas across Abay '-' boundaries to match Turkish syllabic reading:
+ * Shift liaison codas across Abay '-' boundaries to match Turkish syllabic reading
+ * and apply practical Turkish vowel harmony for thick Lafzatullah (tefhîm) and
+ * emphatic sun-letter / cluster liaisons (ص ض ط ظ):
  *   bismi-llâhi-rraḥmâni-rraḥîm  ->  bismil- | lâhir- | raḥmânir- | raḥîm
- *   vele-ḍḍâllîn                 ->  veleḍ- | ḍâllîn
+ *   vekâne-llâhü                 ->  vekânal- | lâhu
+ *   faḍlü-llâhi                  ->  faḍlul- | lâhi
+ *   vellâhü                      ->  vallâhu
+ *   vele-ḍḍâllîn                 ->  velaḍ- | ḍâllîn
+ *   ihdine-ṣṣirâṭa               ->  ihdinaṣ- | ṣirâṭa
  *   yevmeiẕin-lḥaḳḳ              ->  yevmeiẕinil- | ḥaḳḳ  (nûn-u kutnî)
  *   veme'vâküm-nnâru             ->  veme'vâkümün- | nâru (mîm-i cem')
  */
-function shiftLiaisonConsonants(aligned) {
+function shiftLiaisonConsonants(arWords, aligned, style = "practical") {
+  const practical = style !== "classic";
+
+  if (practical) {
+    for (let i = 0; i < aligned.length; i++) {
+      const cleanAr = arWords[i].replace(STRIP_WAQF, "");
+      const prevEndsInI =
+        i > 0 &&
+        aligned[i - 1].hasLiaisonHyphen &&
+        aligned[i - 1].text.endsWith("i");
+
+      if (AR_LAFZATULLAH_PREFIXED_THICK.test(cleanAr)) {
+        if (cleanAr.startsWith("\u0621\u064E\u0627\u0653")) {
+          aligned[i].text = aligned[i].text.replace(/^e(?=llâh)/, "â");
+        } else {
+          aligned[i].text = aligned[i].text.replace(/e(?=llâh)/, "a");
+        }
+      }
+
+      if (AR_LAFZATULLAH_DAMME.test(cleanAr) && !prevEndsInI) {
+        aligned[i].text = aligned[i].text.replace(/llâhü$/, "llâhu");
+      }
+    }
+  }
+
   for (let i = 0; i < aligned.length - 1; i++) {
     if (!aligned[i].hasLiaisonHyphen || aligned[i].isMukattaa) continue;
     let prev = aligned[i].text;
@@ -279,6 +318,20 @@ function shiftLiaisonConsonants(aligned) {
     if (!VOWELS.has(lastChar)) {
       if (lastChar === "n") prev += "i";
       else if (lastChar === "m") prev += "ü";
+    }
+
+    if (practical) {
+      const nextAr = arWords[i + 1].replace(STRIP_WAQF, "");
+      const isThickLafz = AR_LAFZATULLAH_HEAD.test(nextAr);
+      const isEmphaticCluster =
+        next.length >= 2 &&
+        EMPHATIC_LIAISON.has(next[0]) &&
+        !VOWELS.has(next[1]);
+
+      if (isThickLafz || isEmphaticCluster) {
+        if (prev.endsWith("e")) prev = prev.slice(0, -1) + "a";
+        else if (prev.endsWith("ü")) prev = prev.slice(0, -1) + "u";
+      }
     }
 
     if (next.length >= 2 && !VOWELS.has(next[0]) && !VOWELS.has(next[1])) {
@@ -410,11 +463,14 @@ function toTecvid(text) {
 
 /**
  * Convert a single verse into word-aligned Temel and Tecvid Turkish phonetic arrays.
+ * @param {object} [options]
+ * @param {"practical"|"classic"} [options.style="practical"]
  */
-function convertVerseUnified(verseKey, arabicText, abayText) {
+function convertVerseUnified(verseKey, arabicText, abayText, options = {}) {
+  const style = options.style || "practical";
   const arWords = arabicText.split(" ");
   const aligned = alignAbayToArabic(verseKey, arWords, abayText);
-  shiftLiaisonConsonants(aligned);
+  shiftLiaisonConsonants(arWords, aligned, style);
   detectIdgamLinks(arWords, aligned);
 
   const basic = [];
@@ -432,23 +488,42 @@ function convertVerseUnified(verseKey, arabicText, abayText) {
 }
 
 /**
- * Convert all 6,236 verses.
+ * Convert all 6,236 verses and produce a compact diff overlay for the Classic (Abay) style.
  */
 function generateAllUnified(arabicData, abayMap) {
   const basicResult = {};
   const tajweedResult = {};
+  const classicDiff = { b: {}, t: {} };
   let processed = 0;
 
   for (const [key, arabicText] of Object.entries(arabicData)) {
     const abayText = abayMap[key];
     if (!abayText) throw new Error(`Missing Muhammet Abay text for ${key}`);
-    const { basic, tajweed } = convertVerseUnified(key, arabicText, abayText);
-    basicResult[key] = basic;
-    tajweedResult[key] = tajweed;
+    const practical = convertVerseUnified(key, arabicText, abayText, { style: "practical" });
+    const classic = convertVerseUnified(key, arabicText, abayText, { style: "classic" });
+    basicResult[key] = practical.basic;
+    tajweedResult[key] = practical.tajweed;
+
+    const bPatch = {};
+    const tPatch = {};
+    let hasB = false;
+    let hasT = false;
+    for (let i = 0; i < practical.basic.length; i++) {
+      if (classic.basic[i] !== practical.basic[i]) {
+        bPatch[i] = classic.basic[i];
+        hasB = true;
+      }
+      if (classic.tajweed[i] !== practical.tajweed[i]) {
+        tPatch[i] = classic.tajweed[i];
+        hasT = true;
+      }
+    }
+    if (hasB) classicDiff.b[key] = bPatch;
+    if (hasT) classicDiff.t[key] = tPatch;
     processed++;
   }
 
-  return { basicResult, tajweedResult, processed };
+  return { basicResult, tajweedResult, classicDiff, processed };
 }
 
 module.exports = {

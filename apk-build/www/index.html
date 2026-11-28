@@ -151,6 +151,7 @@
     }
     .home-nav select {
       flex: 1;
+      min-width: 0;
       padding: 10px 12px;
       border: 1px solid var(--color-border);
       border-radius: 8px;
@@ -166,6 +167,7 @@
       background-repeat: no-repeat;
       background-position: right 12px center;
       padding-right: 30px;
+      text-overflow: ellipsis;
     }
     .home-nav select:focus { border-color: var(--color-accent); }
 
@@ -476,7 +478,17 @@
       z-index: 1;
     }
 
-    /* Translation */
+    /* Translation & optional inline phonetic line */
+    .verse-phonetic {
+      direction: ltr;
+      text-align: left;
+      font-size: var(--translit-size);
+      font-style: italic;
+      color: var(--color-text-secondary);
+      margin-top: 6px;
+      line-height: 1.7;
+      letter-spacing: 0.01em;
+    }
     .verse-translation {
       direction: ltr;
       text-align: left;
@@ -720,6 +732,104 @@
     .surah-nav-btn.next { text-align: right; }
     .surah-nav-btn.prev { text-align: left; }
 
+    .settings-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-highlight);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 22px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .settings-section-title:first-of-type { margin-top: 4px; }
+    .style-sub {
+      font-size: 10.5px;
+      font-style: italic;
+      color: var(--color-text-secondary);
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .toggle-list {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--color-surface);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 11px 12px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      text-align: left;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      transition: background 0.12s;
+    }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-row:hover { background: var(--color-word-hover); }
+    .toggle-info { flex: 1; min-width: 0; }
+    .toggle-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+    .toggle-desc {
+      font-size: 11.5px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--color-border);
+      flex-shrink: 0;
+      transition: background 0.18s ease;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-bg);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      transition: transform 0.18s ease;
+    }
+    .toggle-row[aria-checked="true"] .toggle-switch {
+      background: var(--color-accent);
+    }
+    .toggle-row[aria-checked="true"] .toggle-switch::after {
+      transform: translateX(18px);
+      background: var(--color-on-accent);
+    }
+    .reset-btn {
+      margin-top: 12px;
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: none;
+      color: var(--color-text-secondary);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .reset-btn:hover { background: var(--color-word-hover); color: var(--color-highlight); border-color: var(--color-highlight); }
+
     /* ===================== SETTINGS EXTRAS & GUIDE MODAL ===================== */
     .guide-trigger {
       margin-top: 8px;
@@ -842,8 +952,7 @@
         <span id="readerSurahDetail"></span>
       </div>
       <div class="mode-toggle">
-        <button class="mode-btn active" data-mode="turkish">Türkçe</button>
-        <button class="mode-btn" data-mode="arabic">Arapça</button>
+        <button class="mode-btn active" data-mode="reading">Okuma</button>
         <button class="mode-btn" data-mode="wbw">Kelime</button>
       </div>
       <button class="settings-btn" data-action="openSettings" aria-label="Ayarlar">
@@ -867,6 +976,8 @@
     <div class="settings-handle"></div>
     <div class="settings-title">Ayarlar</div>
 
+    <div class="settings-section-title">Görünüm &amp; Tema</div>
+
     <div class="setting-group">
       <div class="setting-label">Tema</div>
       <div class="theme-picker">
@@ -885,33 +996,6 @@
         <button class="theme-option" data-t="bordo">
           <div class="theme-dot" style="background:linear-gradient(135deg,#242423 50%,#b85555 50%);border-color:#8a3d3d"></div>
           <div class="theme-option-label">Bordo</div>
-        </button>
-      </div>
-    </div>
-
-    <div class="setting-group">
-      <div class="setting-label">Okunuş Seviyesi</div>
-      <div class="theme-picker">
-        <button class="theme-option level-option active" data-level="basic">
-          <div class="theme-option-label" style="font-size:14px;font-weight:700">Aa</div>
-          <div class="theme-option-label">Temel</div>
-        </button>
-        <button class="theme-option level-option" data-level="tajweed">
-          <div class="theme-option-label" style="font-size:14px;font-weight:700">A&#771;a</div>
-          <div class="theme-option-label">Tecvid</div>
-        </button>
-      </div>
-      <button type="button" class="guide-trigger" id="openGuideBtn">Tecvid İşaretleri Rehberi</button>
-    </div>
-
-    <div class="setting-group">
-      <div class="setting-label">Görünüm</div>
-      <div class="theme-picker">
-        <button class="theme-option meal-option active" data-meal="on">
-          <div class="theme-option-label" style="font-size:13px;font-weight:600">Meal: Açık</div>
-        </button>
-        <button class="theme-option meaning-option active" data-meaning="on">
-          <div class="theme-option-label" style="font-size:13px;font-weight:600">Kelime Anlamı: Açık</div>
         </button>
       </div>
     </div>
@@ -948,14 +1032,115 @@
       </div>
     </div>
 
+    <div class="settings-section-title">Okunuş &amp; Fonetik</div>
+
+    <div class="setting-group">
+      <div class="setting-label">Okunuş Seviyesi</div>
+      <div class="theme-picker">
+        <button class="theme-option level-option active" data-level="basic">
+          <div class="theme-option-label" style="font-size:14px;font-weight:700">Aa</div>
+          <div class="theme-option-label">Temel</div>
+        </button>
+        <button class="theme-option level-option" data-level="tajweed">
+          <div class="theme-option-label" style="font-size:14px;font-weight:700">A&#771;a</div>
+          <div class="theme-option-label">Tecvid</div>
+        </button>
+      </div>
+      <button type="button" class="guide-trigger" id="openGuideBtn">Tecvid İşaretleri Rehberi</button>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Telaffuz Stili</div>
+      <div class="theme-picker">
+        <button class="theme-option style-option active" data-style="practical">
+          <div class="theme-option-label" style="font-weight:700">Pratik Türkçe</div>
+          <div class="style-sub">ve-kâ-nal-lâ-hu · ve-lad-dâl-lîn</div>
+        </button>
+        <button class="theme-option style-option" data-style="classic">
+          <div class="theme-option-label" style="font-weight:700">Klasik (Abay)</div>
+          <div class="style-sub">ve-kâ-nel-lâ-hü · ve-led-dâl-lîn</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="toggle-list">
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showSyllables">
+          <div class="toggle-info">
+            <div class="toggle-title">Hece Tireleri</div>
+            <div class="toggle-desc">Açık: bis-mil-lâh · Kapalı: bismillâh</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="groupLiaison">
+          <div class="toggle-info">
+            <div class="toggle-title">Geçiş Bağlama &amp; Birleştirme</div>
+            <div class="toggle-desc">Bağlı okunan kelimeleri gruplar ve birleştirme (-) gösterir</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showLongVowels">
+          <div class="toggle-info">
+            <div class="toggle-title">Uzun Ünlü Şapkaları (â î û)</div>
+            <div class="toggle-desc">Açık: rah-mâ-nir-ra-hîm · Kapalı: rah-ma-nir-ra-him</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="toggle-row" role="switch" aria-checked="false" data-toggle="showVersePhonetic">
+          <div class="toggle-info">
+            <div class="toggle-title">Ayet Altı Türkçe Okunuş</div>
+            <div class="toggle-desc">Okuma modunda tüm ayetin Türkçe okunuşunu sürekli gösterir</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-section-title">Sayfa &amp; İçerik</div>
+
+    <div class="setting-group">
+      <div class="toggle-list">
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showMeal">
+          <div class="toggle-info">
+            <div class="toggle-title">Meal Göster</div>
+            <div class="toggle-desc">Ayet altında Diyanet mealini gösterir</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showWbwMeaning">
+          <div class="toggle-info">
+            <div class="toggle-title">Kelime Anlamı</div>
+            <div class="toggle-desc">Kelime modunda her kartın altında Türkçe karşılık gösterir</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showBesmele">
+          <div class="toggle-info">
+            <div class="toggle-title">Sure Başı Besmele</div>
+            <div class="toggle-desc">Fâtiha ve Tevbe dışındaki surelerin başında Besmele gösterir</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showPageDividers">
+          <div class="toggle-info">
+            <div class="toggle-title">Sayfa &amp; Cüz Ayraçları</div>
+            <div class="toggle-desc">Mushaf sayfa ve cüz geçiş çizgilerini gösterir</div>
+          </div>
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-section-title">Hakkında &amp; Kaynaklar</div>
+
     <div class="setting-group" style="margin-bottom:0">
-      <div class="setting-label">Hakkında &amp; Kaynaklar</div>
       <div class="about-box">
         <strong>Arapça Metin:</strong> Tanzil (Uthmânî) &amp; Açık Kuran (Diyanet)<br>
         <strong>Türkçe Fonetik:</strong> Muhammet Abay (Tanzil) tabanlı birleşik okunuş<br>
         <strong>Meal:</strong> Diyanet İşleri Başkanlığı<br>
         Tamamen ücretsiz, reklamsız ve çevrimdışıdır; hiçbir kişisel veri toplamaz.
       </div>
+      <button type="button" class="reset-btn" id="resetSettingsBtn">Varsayılan Ayarlara Sıfırla</button>
     </div>
   </div>
 </div>
@@ -974,7 +1159,7 @@
         <tr><td class="guide-mark">z&#818;</td><td class="guide-ar">&#1584;</td><td>Peltek z (dil ucu dişlerde)</td><td>el-le-z&#818;î-ne</td></tr>
         <tr><td class="guide-mark">s&#818;</td><td class="guide-ar">&#1579;</td><td>Peltek s (dil ucu dişlerde)</td><td>ke-s&#818;î-ra-tey</td></tr>
         <tr><td class="guide-mark">z&#818;&#775;</td><td class="guide-ar">&#1592;</td><td>Kalın + peltek z</td><td>a-z&#818;&#775;îm</td></tr>
-        <tr><td class="guide-mark">d&#775;</td><td class="guide-ar">&#1590;</td><td>Kalın d (dâd)</td><td>ve-led&#775;-d&#775;âl-lîn</td></tr>
+        <tr><td class="guide-mark">d&#775;</td><td class="guide-ar">&#1590;</td><td>Kalın d (dâd)</td><td>ve-lad&#775;-d&#775;âl-lîn</td></tr>
         <tr><td class="guide-mark">t&#775;</td><td class="guide-ar">&#1591;</td><td>Kalın t (tı)</td><td>sı-râ-t&#775;al</td></tr>
         <tr><td class="guide-mark">h&#775;</td><td class="guide-ar">&#1582;</td><td>Hırıltılı kalın h (hı)</td><td>h&#775;al-fe-hüm</td></tr>
         <tr><td class="guide-mark">h&#772;</td><td class="guide-ar">&#1581;</td><td>Boğazdan kalın h (hâ)</td><td>rah&#772;-mân</td></tr>
@@ -1016,17 +1201,29 @@ function juzOf(s, v) { return _lastIndexLE(juzStartNums, s * 1000 + v) + 1; }
 // === State ===
 let translitData = null;
 let translitTajweedData = null;
+let classicDiffData = null;
 let arabicUthmaniData = null;
 let arabicAcikkuranData = null;
 let arabicData = null;
 let mealData = null;
 let wbwMeaningsData = null;
 let currentSurah = 1;
-let currentMode = 'turkish';
+let currentMode = 'reading'; // 'reading' or 'wbw'
 let currentLevel = 'basic'; // 'basic' or 'tajweed'
+let currentStyle = 'practical'; // 'practical' or 'classic'
 let currentSource = 'uthmani'; // 'uthmani' or 'acikkuran'
-let showMeal = true;
-let showWbwMeaning = true;
+
+const DEFAULT_TOGGLES = {
+  showSyllables: true,
+  groupLiaison: true,
+  showLongVowels: true,
+  showVersePhonetic: false,
+  showMeal: true,
+  showWbwMeaning: true,
+  showBesmele: true,
+  showPageDividers: true,
+};
+const toggles = { ...DEFAULT_TOGGLES };
 
 // === Persistence ===
 const STORAGE_KEY = 'kuran-satir-arasi';
@@ -1039,6 +1236,11 @@ function loadPrefs() {
 function savePrefs(patch) {
   const prefs = { ...loadPrefs(), ...patch };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+}
+function rerenderIfActive() {
+  if (translitData && document.getElementById('readerScreen').classList.contains('active')) {
+    renderSurah(currentSurah);
+  }
 }
 
 // === Size ===
@@ -1059,10 +1261,19 @@ function applySize() {
 const translitSizes = [0.75, 0.85, 0.95, 1.05, 1.2, 1.35, 1.5];
 let translitIndex = 2;
 
+function updateTranslitPreview() {
+  const preview = document.getElementById('translitPreview');
+  if (!preview) return;
+  preview.style.fontSize = translitSizes[translitIndex] + 'rem';
+  const sample = currentStyle === 'classic'
+    ? (toggles.showSyllables ? 've-kâ-nel-lâ-hü' : 'vekânellâhü')
+    : (toggles.showSyllables ? 've-kâ-nal-lâ-hu' : 'vekânallâhu');
+  preview.textContent = applyLongVowelPref(sample);
+}
+
 function applyTranslitSize() {
   document.documentElement.style.setProperty('--translit-size', translitSizes[translitIndex] + 'rem');
-  const preview = document.getElementById('translitPreview');
-  if (preview) preview.style.fontSize = translitSizes[translitIndex] + 'rem';
+  updateTranslitPreview();
   savePrefs({ translitIndex });
 }
 
@@ -1079,37 +1290,39 @@ function applyTheme(theme) {
   savePrefs({ theme });
 }
 
-function applyMealToggle(enabled) {
-  showMeal = enabled;
-  const btn = document.querySelector('.meal-option');
-  if (btn) {
-    btn.classList.toggle('active', showMeal);
-    btn.querySelector('.theme-option-label').textContent = showMeal ? 'Meal: Açık' : 'Meal: Kapalı';
-  }
-  savePrefs({ showMeal });
-  if (translitData && document.getElementById('readerScreen').classList.contains('active')) {
-    renderSurah(currentSurah);
-  }
+function applyToggle(key, enabled, skipSave) {
+  if (!(key in toggles)) return;
+  toggles[key] = Boolean(enabled);
+  const row = document.querySelector(`.toggle-row[data-toggle="${key}"]`);
+  if (row) row.setAttribute('aria-checked', String(toggles[key]));
+  if (!skipSave) savePrefs({ [key]: toggles[key] });
+  updateTranslitPreview();
+  rerenderIfActive();
 }
 
-function applyMeaningToggle(enabled) {
-  showWbwMeaning = enabled;
-  const btn = document.querySelector('.meaning-option');
-  if (btn) {
-    btn.classList.toggle('active', showWbwMeaning);
-    btn.querySelector('.theme-option-label').textContent = showWbwMeaning ? 'Kelime Anlamı: Açık' : 'Kelime Anlamı: Kapalı';
-  }
-  savePrefs({ showWbwMeaning });
-  if (translitData && document.getElementById('readerScreen').classList.contains('active')) {
-    renderSurah(currentSurah);
-  }
+function applyStyle(style, skipSave) {
+  currentStyle = style === 'classic' ? 'classic' : 'practical';
+  document.querySelectorAll('.style-option').forEach(b =>
+    b.classList.toggle('active', b.dataset.style === currentStyle));
+  if (!skipSave) savePrefs({ style: currentStyle });
+  updateTranslitPreview();
+  rerenderIfActive();
+}
+
+function applyMode(mode, skipSave) {
+  currentMode = mode === 'wbw' ? 'wbw' : 'reading';
+  document.querySelectorAll('.mode-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === currentMode));
+  if (!skipSave) savePrefs({ mode: currentMode });
+  rerenderIfActive();
 }
 
 // === Data Loading ===
 async function loadData() {
-  const [translitRes, tajweedRes, arabicRes, arabicAkRes, mealRes, wbwMeaningsRes] = await Promise.all([
+  const [translitRes, tajweedRes, classicDiffRes, arabicRes, arabicAkRes, mealRes, wbwMeaningsRes] = await Promise.all([
     fetch('../output/turkish-syllables.json'),
     fetch('../output/turkish-syllables-tajweed.json'),
+    fetch('../output/turkish-classic-diff.json'),
     fetch('../data/arabic-uthmani.json?v=2'),
     fetch('../data/arabic-acikkuran.json'),
     fetch('../data/diyanet-meal.json'),
@@ -1117,11 +1330,24 @@ async function loadData() {
   ]);
   translitData = await translitRes.json();
   translitTajweedData = await tajweedRes.json();
+  classicDiffData = await classicDiffRes.json();
   arabicUthmaniData = await arabicRes.json();
   arabicAcikkuranData = await arabicAkRes.json();
   arabicData = currentSource === 'acikkuran' ? arabicAcikkuranData : arabicUthmaniData;
   mealData = await mealRes.json();
   wbwMeaningsData = await wbwMeaningsRes.json();
+}
+
+function getVerseTranslit(key) {
+  const baseMap = currentLevel === 'tajweed' ? translitTajweedData : translitData;
+  const words = baseMap?.[key];
+  if (!words) return [];
+  if (currentStyle !== 'classic' || !classicDiffData) return words;
+  const patch = (currentLevel === 'tajweed' ? classicDiffData.t : classicDiffData.b)?.[key];
+  if (!patch) return words;
+  const copy = words.slice();
+  for (const idx in patch) copy[idx] = patch[idx];
+  return copy;
 }
 
 function applySource(source) {
@@ -1130,12 +1356,46 @@ function applySource(source) {
   document.querySelectorAll('.source-option').forEach(b =>
     b.classList.toggle('active', b.dataset.source === source));
   savePrefs({ source });
-  if (arabicData && document.getElementById('readerScreen').classList.contains('active')) {
-    renderSurah(currentSurah);
-  }
+  rerenderIfActive();
 }
 
-// === Word Grouping ===
+// === Word Grouping & Phonetic Formatting ===
+function applyLongVowelPref(text) {
+  if (toggles.showLongVowels) return text;
+  return text
+    .replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u')
+    .replace(/Â/g, 'A').replace(/Î/g, 'İ').replace(/Û/g, 'U');
+}
+
+function formatSingleWord(raw) {
+  const clean = cleanTranslit(raw);
+  const hasTrailing = clean.endsWith('-');
+  const core = hasTrailing ? clean.slice(0, -1) : clean;
+  const body = toggles.showSyllables ? core : core.replace(/-/g, '');
+  const withLiaison = (hasTrailing && toggles.groupLiaison) ? body + '-' : body;
+  return applyLongVowelPref(withLiaison);
+}
+
+function formatGroupReading(group, translit) {
+  if (!toggles.groupLiaison || group.indices.length === 1) {
+    return formatSingleWord(translit[group.indices[0]]);
+  }
+  const text = toggles.showSyllables
+    ? group.indices.map(i => cleanTranslit(translit[i])).join('').replace(/-+/g, '-')
+    : cleanTranslit(group.translit);
+  return applyLongVowelPref(text);
+}
+
+function formatConnectedFluent(group) {
+  return applyLongVowelPref(cleanTranslit(group.translit));
+}
+
+function formatFullVersePhonetic(groups, translit) {
+  if (!toggles.groupLiaison) {
+    return translit.map(formatSingleWord).join(' ');
+  }
+  return groups.map(g => formatGroupReading(g, translit)).join(' ');
+}
 function groupByTurkish(arabicWords, translitWords) {
   if (!translitWords) return arabicWords.map((w, i) => ({ arabic: [w], translit: '', indices: [i] }));
   const groups = [];
@@ -1230,6 +1490,7 @@ function openSurah(num, verse, skipHistory) {
   document.getElementById('readerSurahDetail').textContent = `${meta.arabic} · ${meta.verses} ayet`;
   showScreen('readerScreen');
   if (wasHome && !skipHistory) {
+    _readerPushed = true;
     history.pushState({ view: 'reader' }, '');
   }
   renderSurah(num);
@@ -1254,8 +1515,11 @@ function goHome(fromPopstate) {
   showScreen('homeScreen');
   renderSurahList();
   window.scrollTo(0, 0);
-  if (!fromPopstate && history.state?.view === 'reader') {
-    history.back();
+  if (fromPopstate) {
+    _readerPushed = false;
+  } else if (_readerPushed) {
+    _readerPushed = false;
+    safeHistoryBack();
   }
 }
 
@@ -1267,10 +1531,11 @@ function renderSurah(surahNum) {
   let html = '';
 
   // Besmele header for all surahs except Fatiha (1:1 is Besmele) and Tevbe (9)
-  if (surahNum !== 1 && surahNum !== 9) {
-    const besmeleTr = currentLevel === 'tajweed'
-      ? 'bismillâhir-rah\u0304mânir-rah\u0304îm'
-      : 'bismillâhir-rahmânir-rahîm';
+  if (toggles.showBesmele && surahNum !== 1 && surahNum !== 9) {
+    const rawBesmele = currentLevel === 'tajweed'
+      ? (toggles.showSyllables ? 'bis-mil-lâ-hir-rah\u0304-mâ-nir-ra-h\u0304îm' : 'bismillâhir-rah\u0304mânir-rah\u0304îm')
+      : (toggles.showSyllables ? 'bis-mil-lâ-hir-rah-mâ-nir-ra-hîm' : 'bismillâhir-rahmânir-rahîm');
+    const besmeleTr = applyLongVowelPref(toggles.groupLiaison ? rawBesmele : rawBesmele.replace(/-(?=(lâ|rah|ra))/g, ' '));
     html += `<div class="surah-besmele">
       <div class="surah-besmele-ar" lang="ar">\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650</div>
       <div class="surah-besmele-tr" lang="tr">${besmeleTr}</div>
@@ -1280,12 +1545,11 @@ function renderSurah(surahNum) {
   for (let v = 1; v <= meta.verses; v++) {
     const key = `${surahNum}:${v}`;
     const arabic = arabicData?.[key] || '';
-    const activeData = currentLevel === 'tajweed' ? translitTajweedData : translitData;
-    const translit = activeData?.[key] || [];
+    const translit = getVerseTranslit(key);
     const arabicWords = arabic.split(' ');
     const meanings = wbwMeaningsData?.[String(surahNum)]?.[String(v)]?.[0] || [];
 
-    if (v > 1 && pageStartSet.has(key)) {
+    if (toggles.showPageDividers && v > 1 && pageStartSet.has(key)) {
       const p = pageOf(surahNum, v);
       const jCur = juzOf(surahNum, v);
       const jPrev = juzOf(surahNum, v - 1);
@@ -1302,18 +1566,20 @@ function renderSurah(surahNum) {
       html += '<div class="verse-translation">Bu ayette kelime okunuşu kullanılamıyor.</div>';
     } else {
       const wbw = currentMode === 'wbw';
-      const groups = currentMode === 'arabic'
-        ? groupByArabic(arabicWords, translit)
-        : groupByTurkish(arabicWords, translit);
+      const groups = toggles.groupLiaison
+        ? groupByTurkish(arabicWords, translit)
+        : groupByArabic(arabicWords, translit);
       html += wbw ? '<div class="verse-wbw">' : '<div class="verse-arabic">';
       for (const group of groups) {
         if (wbw) {
           const arText = group.arabic.join(' ');
-          const sylReading = group.indices.map(i => cleanTranslit(translit[i])).join('').replace(/-+/g, '-');
-          const info = group.indices.length > 1 ? 'Birlikte: ' + cleanTranslit(group.translit) : '';
-          const attrs = `type="button" data-translit="${escapeHtml(sylReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
+          const cardReading = formatGroupReading(group, translit);
+          const info = toggles.groupLiaison && group.indices.length > 1
+            ? 'Birlikte: ' + formatConnectedFluent(group)
+            : '';
+          const attrs = `type="button" data-translit="${escapeHtml(cardReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
           let meaningHtml = '';
-          if (showWbwMeaning && meanings.length) {
+          if (toggles.showWbwMeaning && meanings.length) {
             const parts = group.indices
               .map(i => (meanings[i] || '').trim())
               .filter(m => m && m !== '*');
@@ -1321,11 +1587,13 @@ function renderSurah(surahNum) {
               meaningHtml = `<span class="wbw-meaning" lang="tr">${escapeHtml(parts.join(' · '))}</span>`;
             }
           }
-          html += `<button class="wbw-word" ${attrs}><span class="wbw-arabic" lang="ar">${arText}</span><span class="wbw-translit" lang="tr">${escapeHtml(sylReading)}</span>${meaningHtml}</button>`;
+          html += `<button class="wbw-word" ${attrs}><span class="wbw-arabic" lang="ar">${arText}</span><span class="wbw-translit" lang="tr">${escapeHtml(cardReading)}</span>${meaningHtml}</button>`;
         } else {
-          const context = group.indices.length > 1 ? cleanTranslit(group.translit) : '';
+          const context = toggles.groupLiaison && group.indices.length > 1
+            ? formatConnectedFluent(group)
+            : '';
           for (const i of group.indices) {
-            const wordReading = cleanTranslit(translit[i]);
+            const wordReading = formatSingleWord(translit[i]);
             const info = context ? 'Birlikte: ' + context : '';
             const attrs = `type="button" data-translit="${escapeHtml(wordReading)}" data-context="${escapeHtml(info)}" aria-expanded="false"`;
             html += `<button class="word" lang="ar" ${attrs}>${arabicWords[i]}</button> `;
@@ -1333,9 +1601,13 @@ function renderSurah(surahNum) {
         }
       }
       html += `<span class="${wbw ? 'ayah-badge-wbw' : 'ayah-badge'}">${v}</span></div>`;
+
+      if (!wbw && toggles.showVersePhonetic) {
+        html += `<div class="verse-phonetic" lang="tr">${escapeHtml(formatFullVersePhonetic(groups, translit))}</div>`;
+      }
     }
     const meal = mealData?.[key];
-    if (showMeal && meal) {
+    if (toggles.showMeal && meal) {
       html += `<div class="verse-translation"><span class="ayah-num">${v}.</span>${meal}</div>`;
     }
     html += '</div>';
@@ -1492,12 +1764,7 @@ window.addEventListener('scroll', scheduleReaderSync, { passive: true });
 
 // === Mode Toggle ===
 document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentMode = btn.dataset.mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === currentMode));
-    savePrefs({ mode: currentMode });
-    if (translitData) renderSurah(currentSurah);
-  });
+  btn.addEventListener('click', () => applyMode(btn.dataset.mode));
 });
 
 // === Back Button & Android History Stack ===
@@ -1505,29 +1772,55 @@ document.getElementById('backBtn').addEventListener('click', () => goHome(false)
 
 const overlay = document.getElementById('settingsOverlay');
 const guideOverlay = document.getElementById('guideOverlay');
+let _poppingCount = 0;
+let _readerPushed = false;
+let _settingsPushed = false;
+let _guidePushed = false;
 
+function safeHistoryBack() {
+  _poppingCount++;
+  history.back();
+}
 function openSettings() {
+  if (overlay.classList.contains('open')) return;
   overlay.classList.add('open');
   applySize();
   applyTranslitSize();
+  _settingsPushed = true;
   history.pushState({ view: 'settings' }, '');
 }
 function closeSettings(fromPopstate) {
   if (!overlay.classList.contains('open')) return;
   overlay.classList.remove('open');
-  if (!fromPopstate && history.state?.view === 'settings') history.back();
+  if (fromPopstate) {
+    _settingsPushed = false;
+  } else if (_settingsPushed) {
+    _settingsPushed = false;
+    safeHistoryBack();
+  }
 }
 function openGuide() {
+  if (guideOverlay.classList.contains('open')) return;
   guideOverlay.classList.add('open');
+  _guidePushed = true;
   history.pushState({ view: 'guide' }, '');
 }
 function closeGuide(fromPopstate) {
   if (!guideOverlay.classList.contains('open')) return;
   guideOverlay.classList.remove('open');
-  if (!fromPopstate && history.state?.view === 'guide') history.back();
+  if (fromPopstate) {
+    _guidePushed = false;
+  } else if (_guidePushed) {
+    _guidePushed = false;
+    safeHistoryBack();
+  }
 }
 
 window.addEventListener('popstate', () => {
+  if (_poppingCount > 0) {
+    _poppingCount--;
+    return;
+  }
   if (guideOverlay.classList.contains('open')) {
     closeGuide(true);
   } else if (overlay.classList.contains('open')) {
@@ -1550,14 +1843,23 @@ guideOverlay.addEventListener('click', (e) => {
   if (e.target === guideOverlay) closeGuide(false);
 });
 
-// Theme (strictly scoped to [data-t] buttons so source/level/view toggles never break theme)
+// Theme (strictly scoped to [data-t] buttons so source/level/style toggles never break theme)
 document.querySelectorAll('.theme-option[data-t]').forEach(btn => {
   btn.addEventListener('click', () => applyTheme(btn.dataset.t));
 });
 
-// View toggles
-document.querySelector('.meal-option').addEventListener('click', () => applyMealToggle(!showMeal));
-document.querySelector('.meaning-option').addEventListener('click', () => applyMeaningToggle(!showWbwMeaning));
+// Pronunciation style (Pratik / Klasik)
+document.querySelectorAll('.style-option').forEach(btn => {
+  btn.addEventListener('click', () => applyStyle(btn.dataset.style));
+});
+
+// Switch toggles (Hece, Bağlama, Şapka, Ayet Altı Okunuş, Meal, Kelime Anlamı, Besmele, Sayfa Ayraçları)
+document.querySelectorAll('.toggle-row[data-toggle]').forEach(row => {
+  row.addEventListener('click', () => {
+    const key = row.dataset.toggle;
+    applyToggle(key, !toggles[key]);
+  });
+});
 
 // Source (Arapça yazı)
 document.querySelectorAll('.source-option').forEach(btn => {
@@ -1570,10 +1872,26 @@ document.querySelectorAll('.level-option').forEach(btn => {
     currentLevel = btn.dataset.level;
     document.querySelectorAll('.level-option').forEach(b => b.classList.toggle('active', b.dataset.level === currentLevel));
     savePrefs({ level: currentLevel });
-    if (translitData && document.getElementById('readerScreen').classList.contains('active')) {
-      renderSurah(currentSurah);
-    }
+    rerenderIfActive();
   });
+});
+
+// Reset settings to defaults (preserves bookmark lastSurah / lastVerse)
+document.getElementById('resetSettingsBtn').addEventListener('click', () => {
+  applyTheme('papyrus');
+  sizeIndex = 3;
+  translitIndex = 2;
+  applySize();
+  applyTranslitSize();
+  applyMode('reading');
+  currentLevel = 'basic';
+  document.querySelectorAll('.level-option').forEach(b => b.classList.toggle('active', b.dataset.level === 'basic'));
+  savePrefs({ level: 'basic' });
+  applyStyle('practical');
+  applySource('uthmani');
+  for (const [k, def] of Object.entries(DEFAULT_TOGGLES)) {
+    applyToggle(k, def);
+  }
 });
 
 // Size
@@ -1594,25 +1912,30 @@ document.getElementById('translitUp').addEventListener('click', () => {
 
 // === Init ===
 (async function init() {
-  // Restore preferences
+  // Restore preferences (with clean migration from legacy turkish/arabic mode values)
   const prefs = loadPrefs();
   if (prefs.theme) applyTheme(prefs.theme);
   if (prefs.sizeIndex != null) sizeIndex = prefs.sizeIndex;
   if (prefs.translitIndex != null) translitIndex = prefs.translitIndex;
   if (prefs.mode) {
-    currentMode = prefs.mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === currentMode));
+    if (prefs.mode === 'arabic' && prefs.groupLiaison == null) {
+      toggles.groupLiaison = false;
+    }
+    applyMode(prefs.mode === 'wbw' ? 'wbw' : 'reading', true);
   }
   if (prefs.level) {
     currentLevel = prefs.level;
     document.querySelectorAll('.level-option').forEach(b => b.classList.toggle('active', b.dataset.level === currentLevel));
   }
+  if (prefs.style) applyStyle(prefs.style, true);
   if (prefs.source) {
     currentSource = prefs.source;
     document.querySelectorAll('.source-option').forEach(b => b.classList.toggle('active', b.dataset.source === currentSource));
   }
-  if (prefs.showMeal === false) applyMealToggle(false);
-  if (prefs.showWbwMeaning === false) applyMeaningToggle(false);
+  for (const key of Object.keys(DEFAULT_TOGGLES)) {
+    if (typeof prefs[key] === 'boolean') applyToggle(key, prefs[key], true);
+    else applyToggle(key, toggles[key], true);
+  }
   applySize();
   applyTranslitSize();
 

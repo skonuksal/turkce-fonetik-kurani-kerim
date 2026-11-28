@@ -31,27 +31,28 @@ async function main() {
     assert.equal(await page.locator('.surah-besmele').count(), 0);
     const verse = page.locator('.verse[data-verse="1"]');
     const tooltip = page.getByRole('tooltip');
-    for (const mode of ['turkish', 'arabic']) {
-      await page.locator(`[data-mode="${mode}"]`).tap();
-      const buttons = verse.locator('button[data-translit]');
-      assert.equal(await buttons.count(), 4);
-      for (const [index, expected] of [[0, 'bis-mil-'], [1, 'lâ-hir-']]) {
-        await buttons.nth(index).tap();
-        await tooltip.waitFor({state: 'visible'});
-        assert.equal(await tooltip.locator('.tooltip-text').textContent(), expected);
-        assert.equal(await buttons.nth(index).getAttribute('aria-expanded'), 'true');
-        const rect = await tooltip.boundingBox();
-        assert.ok(rect.x >= 0 && rect.x + rect.width <= 391);
-        assert.ok(rect.y >= 0 && rect.y + rect.height <= 845);
-      }
-      await buttons.nth(1).tap();
-      await tooltip.waitFor({state: 'hidden'});
-      await buttons.first().focus();
-      await page.keyboard.press('Enter');
+
+    // Okuma mode: 2-mode toggle (Okuma / Kelime) + word bubble + Birlikte context
+    assert.equal(await page.locator('.mode-btn').count(), 2);
+    await page.locator('[data-mode="reading"]').tap();
+    const buttons = verse.locator('button[data-translit]');
+    assert.equal(await buttons.count(), 4);
+    for (const [index, expected] of [[0, 'bis-mil-'], [1, 'lâ-hir-']]) {
+      await buttons.nth(index).tap();
       await tooltip.waitFor({state: 'visible'});
-      await page.keyboard.press('Escape');
-      await tooltip.waitFor({state: 'hidden'});
+      assert.equal(await tooltip.locator('.tooltip-text').textContent(), expected);
+      assert.equal(await buttons.nth(index).getAttribute('aria-expanded'), 'true');
+      const rect = await tooltip.boundingBox();
+      assert.ok(rect.x >= 0 && rect.x + rect.width <= 391);
+      assert.ok(rect.y >= 0 && rect.y + rect.height <= 845);
     }
+    await buttons.nth(1).tap();
+    await tooltip.waitFor({state: 'hidden'});
+    await buttons.first().focus();
+    await page.keyboard.press('Enter');
+    await tooltip.waitFor({state: 'visible'});
+    await page.keyboard.press('Escape');
+    await tooltip.waitFor({state: 'hidden'});
 
     // WBW mode groups connected readings into a single tappable card with Turkish meaning
     await page.locator('[data-mode="wbw"]').tap();
@@ -63,17 +64,50 @@ async function main() {
     assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'bis-mil-lâ-hir-rah-mâ-nir-ra-hîm');
     await wbwButtons.first().tap();
     await tooltip.waitFor({state: 'hidden'});
-    await page.locator('[data-mode="turkish"]').tap();
 
-    // Surah 48: Besmele header + Fetih 48:18 unified reading
+    // Optional QoL toggles: turn off groupLiaison, showSyllables, showLongVowels, turn on showVersePhonetic
+    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    await page.locator('[data-toggle="groupLiaison"]').tap();
+    assert.equal(await wbwButtons.count(), 4);
+    await page.locator('[data-toggle="showSyllables"]').tap();
+    await page.locator('[data-toggle="showLongVowels"]').tap();
+    await page.locator('[data-toggle="showVersePhonetic"]').tap();
+    await page.keyboard.press('Escape');
+
+    await page.locator('[data-mode="reading"]').tap();
+    assert.equal(await verse.locator('.verse-phonetic').textContent(), 'bismil lahir rahmanir rahim');
+    await buttons.first().tap();
+    await tooltip.waitFor({state: 'visible'});
+    assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'bismil');
+    await buttons.first().tap();
+
+    // Reset back to defaults (Pratik, syllables on, liaison on, long vowels on, inline phonetic off)
+    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    await page.locator('#resetSettingsBtn').tap();
+    await page.keyboard.press('Escape');
+    assert.equal(await verse.locator('.verse-phonetic').count(), 0);
+
+    // Surah 48: Besmele header + Fetih 48:4 Pratik vs Klasik style toggle + Fetih 48:18
     await page.locator('#surahSelectReader').selectOption('48');
     assert.equal(await page.locator('.surah-besmele').count(), 1);
+    const fetih4 = page.locator('.verse[data-verse="4"] button[data-translit]');
+    assert.equal(await fetih4.nth(15).getAttribute('data-translit'), 've-kâ-nal-');
+    assert.equal(await fetih4.nth(16).getAttribute('data-translit'), 'lâ-hu');
+    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    await page.locator('.style-option[data-style="classic"]').tap();
+    await page.keyboard.press('Escape');
+    assert.equal(await fetih4.nth(15).getAttribute('data-translit'), 've-kâ-nel-');
+    assert.equal(await fetih4.nth(16).getAttribute('data-translit'), 'lâ-hü');
+    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    await page.locator('.style-option[data-style="practical"]').tap();
+    await page.keyboard.press('Escape');
+
     const fetih18 = page.locator('.verse[data-verse="18"] button[data-translit]');
     assert.equal(await fetih18.count(), 19);
     await fetih18.nth(1).tap();
     await tooltip.waitFor({state: 'visible'});
-    assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'ra-dı-yel-');
-    assert.match(await tooltip.textContent(), /Birlikte: radıyel-lâhü/);
+    assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'ra-dı-yal-');
+    assert.match(await tooltip.textContent(), /Birlikte: radıyal-lâhu/);
 
     // Surah 9 (Tevbe): no Besmele header
     await page.locator('#surahSelectReader').selectOption('9');

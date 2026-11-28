@@ -33,23 +33,25 @@ for (const entry of abayJson.quran) {
 }
 
 console.log("Generating unified Turkish phonetic & tajweed data...");
-const { basicResult, tajweedResult, processed } = generateAllUnified(
+const { basicResult, tajweedResult, classicDiff, processed } = generateAllUnified(
   arabicData,
   abayMap
 );
 
 // Both web demo and Android APK load these JSON files directly.
-for (const [file, verses] of [
-  ["turkish-syllables.json", basicResult],
-  ["turkish-syllables-tajweed.json", tajweedResult],
+for (const [file, payload, compact] of [
+  ["turkish-syllables.json", basicResult, false],
+  ["turkish-syllables-tajweed.json", tajweedResult, false],
+  ["turkish-classic-diff.json", classicDiff, true],
 ]) {
-  const json = JSON.stringify(verses, null, 2);
+  const json = compact ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
   for (const dir of ["output", "apk-build/www/output"]) {
     fs.writeFileSync(path.join(__dirname, dir, file), json, "utf-8");
   }
 }
 
-console.log(`Done. ${processed} ayet islendi, 0 hata.`);
+const classicDiffVerses = Object.keys(classicDiff.b).length;
+console.log(`Done. ${processed} ayet islendi, 0 hata. (Klasik fark: ${classicDiffVerses} ayet)`);
 
 const samples = ["1:1", "1:7", "2:2", "48:18", "112:1"];
 console.log("\nOrnekler (Temel):");

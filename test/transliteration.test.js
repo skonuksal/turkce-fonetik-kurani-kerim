@@ -10,6 +10,7 @@ const abayJson = require("../data/muhammet-abay.json");
 const wbwMeanings = require("../data/wbw-turkish-meanings.json");
 const basic = require("../output/turkish-syllables.json");
 const tajweed = require("../output/turkish-syllables-tajweed.json");
+const classicDiff = require("../output/turkish-classic-diff.json");
 
 const abay = Object.fromEntries(
   abayJson.quran.map((v) => [`${v.chapter}:${v.verse}`, v.text])
@@ -19,13 +20,14 @@ test("unified phonetic & tajweed outputs match expected Turkish kıraat samples"
   assert.deepEqual(basic["1:1"], ["bis-mil-", "lâ-hir-", "rah-mâ-nir-", "ra-hîm"]);
   assert.deepEqual(tajweed["1:1"], ["bis-mil-", "lâ-hir-", "rah\u0304-mâ-nir-", "ra-h\u0304îm"]);
 
+  assert.deepEqual(basic["1:6"], ["ih-di-nas-", "sı-râ-tal-", "müs-te-kîm"]);
   assert.deepEqual(basic["1:7"], [
     "sı-râ-tal-", "le-zî-ne", "en-'am-te", "a-ley-him",
-    "ğay-ril-", "mağ-dû-bi", "a-ley-him", "ve-led-", "dâl-lîn",
+    "ğay-ril-", "mağ-dû-bi", "a-ley-him", "ve-lad-", "dâl-lîn",
   ]);
   assert.deepEqual(tajweed["1:7"], [
     "sı-râ-t\u0307al-", "le-z\u0332î-ne", "en-'am-te", "a-ley-him",
-    "ğay-ril-", "mağ-d\u0307û-bi", "a-ley-him", "ve-led\u0307-", "d\u0307âl-lîn",
+    "ğay-ril-", "mağ-d\u0307û-bi", "a-ley-him", "ve-lad\u0307-", "d\u0307âl-lîn",
   ]);
 
   assert.deepEqual(basic["2:1"], ["elif-lâm-mîm"]);
@@ -33,8 +35,21 @@ test("unified phonetic & tajweed outputs match expected Turkish kıraat samples"
     "zâ-li-kel-", "ki-tâ-bü", "lâ", "ray-be", "fîh", "hü-del-", "lil-müt-te-kîn",
   ]);
 
+  // Practical Turkish thick Lafzatullah (tefhîm) vs thin Lafzatullah after kesre
+  assert.deepEqual(basic["48:4"].slice(-4), ["ve-kâ-nal-", "lâ-hu", "a-lî-men", "ha-kî-mâ"]);
+  assert.deepEqual(basic["112:1"], ["kul", "hü-val-", "lâ-hu", "e-had"]);
+  assert.deepEqual(basic["112:2"], ["al-lâ-hus-", "sa-med"]);
+  assert.equal(basic["2:255"][0], "al-lâ-hu");
+  assert.equal(basic["2:19"][16], "val-lâ-hu");
+  assert.equal(basic["2:64"][6], "fad-lul-");
+  assert.equal(basic["2:64"][7], "lâ-hi");
+  assert.equal(basic["2:73"][4], "yuh-yil-");
+  assert.equal(basic["2:73"][5], "lâ-hül-");
+  assert.equal(basic["10:59"][13], "âl-lâ-hu");
+  assert.equal(basic["21:57"][0], "ve-tal-lâ-hi");
+
   assert.deepEqual(basic["48:18"], [
-    "le-kad", "ra-dı-yel-", "lâ-hü", "a-nil-", "mü'-mi-nî-ne", "iz",
+    "le-kad", "ra-dı-yal-", "lâ-hu", "a-nil-", "mü'-mi-nî-ne", "iz",
     "yü-bâ-yi-'û-ne-ke", "tah-teş-", "şe-ce-ra-ti", "fe-'a-li-me", "mâ",
     "fî", "ku-lû-bi-him", "fe-en-ze-les-", "se-kî-ne-te", "a-ley-him",
     "ve-e-sâ-be-hüm", "fet-han", "ka-rî-bâ",
@@ -55,6 +70,16 @@ test("unified phonetic & tajweed outputs match expected Turkish kıraat samples"
   const direct = convertVerseUnified("48:18", arabic["48:18"], abay["48:18"]);
   assert.deepEqual(direct.basic, basic["48:18"]);
   assert.deepEqual(direct.tajweed, tajweed["48:18"]);
+
+  // Classic (Abay) style diff overlay reconstructs exact Abay vowel spelling
+  const classic48_4 = convertVerseUnified("48:4", arabic["48:4"], abay["48:4"], { style: "classic" });
+  const patched48_4 = basic["48:4"].slice();
+  for (const [idx, val] of Object.entries(classicDiff.b["48:4"] || {})) patched48_4[idx] = val;
+  assert.deepEqual(patched48_4, classic48_4.basic);
+  assert.deepEqual(patched48_4.slice(-4), ["ve-kâ-nel-", "lâ-hü", "a-lî-men", "ha-kî-mâ"]);
+  assert.equal(classicDiff.b["1:7"]["7"], "ve-led-");
+  assert.equal(classicDiff.b["112:1"]["1"], "hü-vel-");
+  assert.equal(classicDiff.b["112:1"]["2"], "lâ-hü");
 });
 
 test("all 6,236 verses and 77,429 words align 100% with zero academic symbol leakage", () => {
@@ -97,6 +122,7 @@ test("web demo and Android APK bundles are identical and free of unused data", (
     ["../demo/index.html", "../apk-build/www/index.html"],
     ["../output/turkish-syllables.json", "../apk-build/www/output/turkish-syllables.json"],
     ["../output/turkish-syllables-tajweed.json", "../apk-build/www/output/turkish-syllables-tajweed.json"],
+    ["../output/turkish-classic-diff.json", "../apk-build/www/output/turkish-classic-diff.json"],
     ["../data/arabic-uthmani.json", "../apk-build/www/data/arabic-uthmani.json"],
     ["../data/arabic-acikkuran.json", "../apk-build/www/data/arabic-acikkuran.json"],
     ["../data/diyanet-meal.json", "../apk-build/www/data/diyanet-meal.json"],
