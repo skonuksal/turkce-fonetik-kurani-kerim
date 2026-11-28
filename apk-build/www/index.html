@@ -732,17 +732,86 @@
     .surah-nav-btn.next { text-align: right; }
     .surah-nav-btn.prev { text-align: left; }
 
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .panel-header .settings-title { margin-bottom: 0; }
+    .panel-close-btn {
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      font-size: 22px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .panel-close-btn:hover { background: var(--color-word-hover); color: var(--color-text-primary); }
+    .nav-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      font-family: var(--font-ui);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .nav-card:hover { border-color: var(--color-highlight); background: var(--color-word-hover); }
+    .nav-card-title { font-size: 13.5px; font-weight: 600; color: var(--color-text-primary); }
+    .nav-card-sub { font-size: 11.5px; color: var(--color-text-secondary); margin-top: 2px; }
+    .nav-card-chevron { font-size: 18px; color: var(--color-highlight); font-weight: 600; flex-shrink: 0; }
+    .settings-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border);
+    }
+    .about-details { flex: 1; font-size: 12px; color: var(--color-text-secondary); }
+    .about-details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      list-style: none;
+    }
+    .about-details summary::-webkit-details-marker { display: none; }
+    .about-details[open] .about-box { margin-top: 8px; }
+    .reset-link {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: var(--color-text-secondary);
+      font-family: var(--font-ui);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .reset-link:hover { border-color: var(--color-highlight); color: var(--color-highlight); background: var(--color-word-hover); }
     .settings-section-title {
       font-size: 11px;
       font-weight: 700;
       color: var(--color-highlight);
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin: 22px 0 12px;
-      padding-bottom: 6px;
+      margin: 18px 0 10px;
+      padding-bottom: 5px;
       border-bottom: 1px solid var(--color-border);
     }
-    .settings-section-title:first-of-type { margin-top: 4px; }
+    .settings-section-title:first-of-type { margin-top: 2px; }
     .style-sub {
       font-size: 10.5px;
       font-style: italic;
@@ -955,7 +1024,10 @@
         <button class="mode-btn active" data-mode="reading">Okuma</button>
         <button class="mode-btn" data-mode="wbw">Kelime</button>
       </div>
-      <button class="settings-btn" data-action="openSettings" aria-label="Ayarlar">
+      <button class="settings-btn" data-action="openReadingSettings" aria-label="Okunuş Ayarları" title="Okunuş Ayarları">
+        <svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+      </button>
+      <button class="settings-btn" data-action="openSettings" aria-label="Ayarlar" title="Ayarlar">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
       </button>
     </div>
@@ -970,13 +1042,14 @@
   </div>
 </div>
 
-<!-- ==================== SETTINGS OVERLAY ==================== -->
+<!-- ==================== SETTINGS OVERLAY (APPEARANCE) ==================== -->
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-panel">
     <div class="settings-handle"></div>
-    <div class="settings-title">Ayarlar</div>
-
-    <div class="settings-section-title">Görünüm &amp; Tema</div>
+    <div class="panel-header">
+      <div class="settings-title">Ayarlar</div>
+      <button type="button" class="panel-close-btn" id="closeSettingsBtn" aria-label="Kapat">&times;</button>
+    </div>
 
     <div class="setting-group">
       <div class="setting-label">Tema</div>
@@ -1027,12 +1100,44 @@
       <div class="setting-label">Fonetik Yazı Boyutu</div>
       <div class="size-slider-row">
         <button class="size-slider-btn" id="translitDown" aria-label="Küçült">-</button>
-        <div class="size-preview" id="translitPreview" style="font-family:var(--font-ui);font-style:italic">bis-mil-lâh</div>
+        <div class="size-preview" id="translitPreview" style="font-family:var(--font-ui);font-style:italic">ve-kâ-nal-lâ-hu</div>
         <button class="size-slider-btn" id="translitUp" aria-label="Büyüt">+</button>
       </div>
     </div>
 
-    <div class="settings-section-title">Okunuş &amp; Fonetik</div>
+    <div class="setting-group" style="margin-bottom:0">
+      <button type="button" class="nav-card" id="openReadingFromSettings" data-action="openReadingSettings">
+        <div>
+          <div class="nav-card-title">Okunuş Ayarları</div>
+          <div class="nav-card-sub" id="readingSummary">Temel · Pratik · Hece · Bağlama</div>
+        </div>
+        <span class="nav-card-chevron" aria-hidden="true">&rsaquo;</span>
+      </button>
+    </div>
+
+    <div class="settings-footer-row">
+      <details class="about-details">
+        <summary>Hakkında &amp; Kaynaklar</summary>
+        <div class="about-box">
+          <strong>Arapça Metin:</strong> Tanzil (Uthmânî) &amp; Açık Kuran (Diyanet)<br>
+          <strong>Türkçe Fonetik:</strong> Muhammet Abay (Tanzil) tabanlı birleşik okunuş<br>
+          <strong>Meal:</strong> Diyanet İşleri Başkanlığı<br>
+          Tamamen ücretsiz, reklamsız ve çevrimdışıdır; kişisel veri toplamaz.
+        </div>
+      </details>
+      <button type="button" class="reset-link" id="resetSettingsBtn">Sıfırla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== READING SETTINGS OVERLAY ==================== -->
+<div class="settings-overlay" id="readingSettingsOverlay">
+  <div class="settings-panel">
+    <div class="settings-handle"></div>
+    <div class="panel-header">
+      <div class="settings-title">Okunuş Ayarları</div>
+      <button type="button" class="panel-close-btn" id="closeReadingBtn" aria-label="Kapat">&times;</button>
+    </div>
 
     <div class="setting-group">
       <div class="setting-label">Okunuş Seviyesi</div>
@@ -1063,84 +1168,70 @@
       </div>
     </div>
 
+    <div class="settings-section-title">Fonetik &amp; Bağlama</div>
     <div class="setting-group">
       <div class="toggle-list">
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showSyllables">
           <div class="toggle-info">
             <div class="toggle-title">Hece Tireleri</div>
-            <div class="toggle-desc">Açık: bis-mil-lâh · Kapalı: bismillâh</div>
+            <div class="toggle-desc">bis-mil-lâh &harr; bismillâh</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="groupLiaison">
           <div class="toggle-info">
             <div class="toggle-title">Geçiş Bağlama &amp; Birleştirme</div>
-            <div class="toggle-desc">Bağlı okunan kelimeleri gruplar ve birleştirme (-) gösterir</div>
+            <div class="toggle-desc">Bağlı okunan kelimeleri gruplar ve (-) gösterir</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showLongVowels">
           <div class="toggle-info">
             <div class="toggle-title">Uzun Ünlü Şapkaları (â î û)</div>
-            <div class="toggle-desc">Açık: rah-mâ-nir-ra-hîm · Kapalı: rah-ma-nir-ra-him</div>
+            <div class="toggle-desc">rah-mâ-nir-ra-hîm &harr; rah-ma-nir-ra-him</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
         <button type="button" class="toggle-row" role="switch" aria-checked="false" data-toggle="showVersePhonetic">
           <div class="toggle-info">
             <div class="toggle-title">Ayet Altı Türkçe Okunuş</div>
-            <div class="toggle-desc">Okuma modunda tüm ayetin Türkçe okunuşunu sürekli gösterir</div>
+            <div class="toggle-desc">Okuma modunda tam satır fonetik gösterir</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
       </div>
     </div>
 
-    <div class="settings-section-title">Sayfa &amp; İçerik</div>
-
-    <div class="setting-group">
+    <div class="settings-section-title">Sayfa Öğeleri</div>
+    <div class="setting-group" style="margin-bottom:0">
       <div class="toggle-list">
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showMeal">
           <div class="toggle-info">
-            <div class="toggle-title">Meal Göster</div>
-            <div class="toggle-desc">Ayet altında Diyanet mealini gösterir</div>
+            <div class="toggle-title">Meal</div>
+            <div class="toggle-desc">Ayet altında Diyanet meali</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showWbwMeaning">
           <div class="toggle-info">
             <div class="toggle-title">Kelime Anlamı</div>
-            <div class="toggle-desc">Kelime modunda her kartın altında Türkçe karşılık gösterir</div>
+            <div class="toggle-desc">Kelime modunda Türkçe karşılık</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showBesmele">
           <div class="toggle-info">
             <div class="toggle-title">Sure Başı Besmele</div>
-            <div class="toggle-desc">Fâtiha ve Tevbe dışındaki surelerin başında Besmele gösterir</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
         <button type="button" class="toggle-row" role="switch" aria-checked="true" data-toggle="showPageDividers">
           <div class="toggle-info">
             <div class="toggle-title">Sayfa &amp; Cüz Ayraçları</div>
-            <div class="toggle-desc">Mushaf sayfa ve cüz geçiş çizgilerini gösterir</div>
           </div>
           <span class="toggle-switch" aria-hidden="true"></span>
         </button>
       </div>
-    </div>
-
-    <div class="settings-section-title">Hakkında &amp; Kaynaklar</div>
-
-    <div class="setting-group" style="margin-bottom:0">
-      <div class="about-box">
-        <strong>Arapça Metin:</strong> Tanzil (Uthmânî) &amp; Açık Kuran (Diyanet)<br>
-        <strong>Türkçe Fonetik:</strong> Muhammet Abay (Tanzil) tabanlı birleşik okunuş<br>
-        <strong>Meal:</strong> Diyanet İşleri Başkanlığı<br>
-        Tamamen ücretsiz, reklamsız ve çevrimdışıdır; hiçbir kişisel veri toplamaz.
-      </div>
-      <button type="button" class="reset-btn" id="resetSettingsBtn">Varsayılan Ayarlara Sıfırla</button>
     </div>
   </div>
 </div>
@@ -1261,14 +1352,29 @@ function applySize() {
 const translitSizes = [0.75, 0.85, 0.95, 1.05, 1.2, 1.35, 1.5];
 let translitIndex = 2;
 
+function updateReadingSummary() {
+  const el = document.getElementById('readingSummary');
+  if (!el) return;
+  const parts = [
+    currentLevel === 'tajweed' ? 'Tecvid' : 'Temel',
+    currentStyle === 'classic' ? 'Klasik' : 'Pratik',
+  ];
+  if (toggles.showSyllables) parts.push('Hece');
+  if (toggles.groupLiaison) parts.push('Bağlama');
+  if (toggles.showVersePhonetic) parts.push('Ayet altı');
+  el.textContent = parts.join(' · ');
+}
+
 function updateTranslitPreview() {
   const preview = document.getElementById('translitPreview');
-  if (!preview) return;
-  preview.style.fontSize = translitSizes[translitIndex] + 'rem';
-  const sample = currentStyle === 'classic'
-    ? (toggles.showSyllables ? 've-kâ-nel-lâ-hü' : 'vekânellâhü')
-    : (toggles.showSyllables ? 've-kâ-nal-lâ-hu' : 'vekânallâhu');
-  preview.textContent = applyLongVowelPref(sample);
+  if (preview) {
+    preview.style.fontSize = translitSizes[translitIndex] + 'rem';
+    const sample = currentStyle === 'classic'
+      ? (toggles.showSyllables ? 've-kâ-nel-lâ-hü' : 'vekânellâhü')
+      : (toggles.showSyllables ? 've-kâ-nal-lâ-hu' : 'vekânallâhu');
+    preview.textContent = applyLongVowelPref(sample);
+  }
+  updateReadingSummary();
 }
 
 function applyTranslitSize() {
@@ -1716,8 +1822,9 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    if (guideOverlay.classList.contains('open')) closeGuide();
-    else if (overlay.classList.contains('open')) closeSettings();
+    if (guideOverlay.classList.contains('open')) closeGuide(false);
+    else if (readingOverlay.classList.contains('open')) closeReadingSettings(false);
+    else if (overlay.classList.contains('open')) closeSettings(false);
     else closeTooltip();
   }
 });
@@ -1771,10 +1878,12 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 document.getElementById('backBtn').addEventListener('click', () => goHome(false));
 
 const overlay = document.getElementById('settingsOverlay');
+const readingOverlay = document.getElementById('readingSettingsOverlay');
 const guideOverlay = document.getElementById('guideOverlay');
 let _poppingCount = 0;
 let _readerPushed = false;
 let _settingsPushed = false;
+let _readingPushed = false;
 let _guidePushed = false;
 
 function safeHistoryBack() {
@@ -1796,6 +1905,22 @@ function closeSettings(fromPopstate) {
     _settingsPushed = false;
   } else if (_settingsPushed) {
     _settingsPushed = false;
+    safeHistoryBack();
+  }
+}
+function openReadingSettings() {
+  if (readingOverlay.classList.contains('open')) return;
+  readingOverlay.classList.add('open');
+  _readingPushed = true;
+  history.pushState({ view: 'reading-settings' }, '');
+}
+function closeReadingSettings(fromPopstate) {
+  if (!readingOverlay.classList.contains('open')) return;
+  readingOverlay.classList.remove('open');
+  if (fromPopstate) {
+    _readingPushed = false;
+  } else if (_readingPushed) {
+    _readingPushed = false;
     safeHistoryBack();
   }
 }
@@ -1823,6 +1948,8 @@ window.addEventListener('popstate', () => {
   }
   if (guideOverlay.classList.contains('open')) {
     closeGuide(true);
+  } else if (readingOverlay.classList.contains('open')) {
+    closeReadingSettings(true);
   } else if (overlay.classList.contains('open')) {
     closeSettings(true);
   } else if (document.getElementById('readerScreen').classList.contains('active')) {
@@ -1834,8 +1961,16 @@ window.addEventListener('popstate', () => {
 document.querySelectorAll('[data-action="openSettings"]').forEach(btn => {
   btn.addEventListener('click', openSettings);
 });
+document.querySelectorAll('[data-action="openReadingSettings"]').forEach(btn => {
+  btn.addEventListener('click', openReadingSettings);
+});
+document.getElementById('closeSettingsBtn').addEventListener('click', () => closeSettings(false));
+document.getElementById('closeReadingBtn').addEventListener('click', () => closeReadingSettings(false));
 overlay.addEventListener('click', (e) => {
   if (e.target === overlay) closeSettings(false);
+});
+readingOverlay.addEventListener('click', (e) => {
+  if (e.target === readingOverlay) closeReadingSettings(false);
 });
 document.getElementById('openGuideBtn').addEventListener('click', openGuide);
 document.getElementById('closeGuideBtn').addEventListener('click', () => closeGuide(false));
@@ -1872,6 +2007,7 @@ document.querySelectorAll('.level-option').forEach(btn => {
     currentLevel = btn.dataset.level;
     document.querySelectorAll('.level-option').forEach(b => b.classList.toggle('active', b.dataset.level === currentLevel));
     savePrefs({ level: currentLevel });
+    updateReadingSummary();
     rerenderIfActive();
   });
 });

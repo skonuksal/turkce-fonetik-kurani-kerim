@@ -22,10 +22,14 @@ async function main() {
     await page.locator('.source-option[data-source="acikkuran"]').tap();
     assert.equal(await page.evaluate(() => document.documentElement.getAttribute('data-theme')), 'bordo');
     await page.locator('.source-option[data-source="uthmani"]').tap();
+    // Open separate Okunuş Ayarları panel from Settings, then Tecvid Guide
+    await page.locator('#openReadingFromSettings').tap();
+    await page.locator('#readingSettingsOverlay.open').waitFor({state: 'visible'});
     await page.locator('#openGuideBtn').tap();
     await page.locator('#guideOverlay.open').waitFor({state: 'visible'});
     await page.locator('#closeGuideBtn').tap();
-    await page.keyboard.press('Escape');
+    await page.locator('#closeReadingBtn').tap();
+    await page.locator('#closeSettingsBtn').tap();
 
     await page.locator('.surah-item[data-surah="1"]').tap();
     assert.equal(await page.locator('.surah-besmele').count(), 0);
@@ -65,14 +69,15 @@ async function main() {
     await wbwButtons.first().tap();
     await tooltip.waitFor({state: 'hidden'});
 
-    // Optional QoL toggles: turn off groupLiaison, showSyllables, showLongVowels, turn on showVersePhonetic
-    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    // Optional QoL toggles via dedicated Okunuş Ayarları button in reader header
+    await page.locator('#readerScreen [data-action="openReadingSettings"]').tap();
+    await page.locator('#readingSettingsOverlay.open').waitFor({state: 'visible'});
     await page.locator('[data-toggle="groupLiaison"]').tap();
     assert.equal(await wbwButtons.count(), 4);
     await page.locator('[data-toggle="showSyllables"]').tap();
     await page.locator('[data-toggle="showLongVowels"]').tap();
     await page.locator('[data-toggle="showVersePhonetic"]').tap();
-    await page.keyboard.press('Escape');
+    await page.locator('#closeReadingBtn').tap();
 
     await page.locator('[data-mode="reading"]').tap();
     assert.equal(await verse.locator('.verse-phonetic').textContent(), 'bismil lahir rahmanir rahim');
@@ -81,10 +86,10 @@ async function main() {
     assert.equal(await tooltip.locator('.tooltip-text').textContent(), 'bismil');
     await buttons.first().tap();
 
-    // Reset back to defaults (Pratik, syllables on, liaison on, long vowels on, inline phonetic off)
+    // Reset back to defaults from slim Settings panel
     await page.locator('#readerScreen [data-action="openSettings"]').tap();
     await page.locator('#resetSettingsBtn').tap();
-    await page.keyboard.press('Escape');
+    await page.locator('#closeSettingsBtn').tap();
     assert.equal(await verse.locator('.verse-phonetic').count(), 0);
 
     // Surah 48: Besmele header + Fetih 48:4 Pratik vs Klasik style toggle + Fetih 48:18
@@ -93,14 +98,14 @@ async function main() {
     const fetih4 = page.locator('.verse[data-verse="4"] button[data-translit]');
     assert.equal(await fetih4.nth(15).getAttribute('data-translit'), 've-kâ-nal-');
     assert.equal(await fetih4.nth(16).getAttribute('data-translit'), 'lâ-hu');
-    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    await page.locator('#readerScreen [data-action="openReadingSettings"]').tap();
     await page.locator('.style-option[data-style="classic"]').tap();
-    await page.keyboard.press('Escape');
+    await page.locator('#closeReadingBtn').tap();
     assert.equal(await fetih4.nth(15).getAttribute('data-translit'), 've-kâ-nel-');
     assert.equal(await fetih4.nth(16).getAttribute('data-translit'), 'lâ-hü');
-    await page.locator('#readerScreen [data-action="openSettings"]').tap();
+    await page.locator('#readerScreen [data-action="openReadingSettings"]').tap();
     await page.locator('.style-option[data-style="practical"]').tap();
-    await page.keyboard.press('Escape');
+    await page.locator('#closeReadingBtn').tap();
 
     const fetih18 = page.locator('.verse[data-verse="18"] button[data-translit]');
     assert.equal(await fetih18.count(), 19);
